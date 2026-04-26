@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HPSHOP — Administration</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Bebas+Neue&display=swap');
+:root{
+  --red:#E8001C;--gold:#F5A800;--green:#1A8A2E;
+  --blue:#3B82F6;--purple:#8B5CF6;--orange:#F97316;
+  --bg:#F4F6FA;--white:#fff;--dark:#1a1a1a;
+  --muted:#6b7280;--border:#E5E7EB;
+  --shadow:0 2px 12px rgba(0,0,0,0.07);
+  --shadow-lg:0 8px 30px rgba(0,0,0,0.12);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:"Nunito",sans-serif;background:var(--bg);color:var(--dark);}
+
+/* LOGIN */
+.login-screen{position:fixed;inset:0;background:linear-gradient(135deg,#0a0800,#1a0500);display:flex;align-items:center;justify-content:center;z-index:9999;}
+.login-box{background:#fff;border-radius:20px;padding:2.5rem;width:400px;box-shadow:0 30px 80px rgba(0,0,0,0.4);text-align:center;}
+.login-logo{font-family:"Bebas Neue",sans-serif;font-size:2.5rem;color:var(--red);letter-spacing:3px;}
+.login-sub{font-size:.8rem;color:var(--muted);margin-bottom:2rem;font-weight:600;}
+.login-fg{margin-bottom:1rem;text-align:left;}
+.login-fg label{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);display:block;margin-bottom:.35rem;}
+.login-fg input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:8px;font-family:"Nunito",sans-serif;font-size:.95rem;outline:none;transition:border-color .3s;}
+.login-fg input:focus{border-color:var(--red);}
+.login-btn{width:100%;background:var(--red);color:#fff;border:none;padding:14px;border-radius:8px;font-family:"Bebas Neue",sans-serif;font-size:1.3rem;letter-spacing:2px;cursor:pointer;transition:background .3s;margin-top:.5rem;}
+.login-btn:hover{background:#b8001a;}
+.demo-hint{font-size:.68rem;color:#bbb;margin-top:1rem;line-height:1.8;}
+.role-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.65rem;font-weight:800;margin-left:.3rem;}
+.rb-ceo{background:rgba(245,168,0,.15);color:#a06800;}
+.rb-sup{background:rgba(139,92,246,.15);color:var(--purple);}
+.rb-agent{background:rgba(232,0,28,.1);color:var(--red);}
+
+/* LAYOUT */
+.layout{display:grid;grid-template-columns:260px 1fr;min-height:100vh;}
+.sidebar{background:#111;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;}
+.sb-logo{padding:1.5rem;border-bottom:1px solid rgba(255,255,255,.07);}
+.sb-logo-main{font-family:"Bebas Neue",sans-serif;font-size:1.8rem;color:var(--gold);letter-spacing:3px;line-height:1;}
+.sb-logo-sub{font-size:.6rem;color:rgba(255,255,255,.3);letter-spacing:2px;text-transform:uppercase;margin-top:.2rem;}
+.sb-user{padding:1rem 1.5rem;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:.8rem;}
+.sb-av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;font-size:.9rem;flex-shrink:0;}
+.sb-uname{font-weight:800;color:#fff;font-size:.85rem;}
+.sb-urole{font-size:.62rem;margin-top:.15rem;}
+.sb-nav{flex:1;padding:.8rem 0;}
+.sb-sec{font-size:.58rem;font-weight:800;letter-spacing:2.5px;text-transform:uppercase;color:rgba(255,255,255,.25);padding:.5rem 1.5rem;margin-top:.5rem;}
+.sb-link{display:flex;align-items:center;gap:.8rem;padding:.75rem 1.5rem;color:rgba(255,255,255,.5);font-size:.83rem;font-weight:700;cursor:pointer;transition:all .2s;border-left:3px solid transparent;}
+.sb-link:hover,.sb-link.on{background:rgba(255,255,255,.06);color:#fff;border-left-color:var(--gold);}
+.sb-ico{font-size:1rem;width:20px;text-align:center;}
+.sb-badge{background:var(--red);color:#fff;font-size:.58rem;font-weight:800;padding:2px 7px;border-radius:10px;margin-left:auto;}
+.sb-bot{padding:1rem 1.5rem;border-top:1px solid rgba(255,255,255,.07);}
+.sb-logout{display:flex;align-items:center;gap:.6rem;color:rgba(255,255,255,.35);font-size:.78rem;cursor:pointer;transition:color .3s;}
+.sb-logout:hover{color:var(--red);}
+
+/* TOPBAR */
+.main{display:flex;flex-direction:column;overflow:hidden;}
+.topbar{background:#fff;border-bottom:1px solid var(--border);padding:0 2rem;height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:var(--shadow);flex-shrink:0;}
+.tb-title{font-family:"Bebas Neue",sans-serif;font-size:1.3rem;letter-spacing:1px;}
+.tb-right{display:flex;align-items:center;gap:.8rem;}
+.tb-tag{padding:5px 16px;border-radius:20px;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;}
+.tag-ceo{background:rgba(245,168,0,.15);color:#a06800;border:1px solid rgba(245,168,0,.3);}
+.tag-sup{background:rgba(139,92,246,.1);color:var(--purple);border:1px solid rgba(139,92,246,.2);}
+.tag-agent{background:rgba(232,0,28,.08);color:var(--red);border:1px solid rgba(232,0,28,.15);}
+
+/* PAGES */
+.page{display:none;padding:2rem;flex:1;overflow-y:auto;}
+.page.on{display:block;}
+
+/* STATS */
+.sg{display:grid;grid-template-columns:repeat(5,1fr);gap:1rem;margin-bottom:1.8rem;}
+.sc{background:#fff;border-radius:12px;padding:1.4rem;box-shadow:var(--shadow);border-top:3px solid var(--border);transition:all .3s;}
+.sc:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg);}
+.sc-red{border-top-color:var(--red);}
+.sc-gold{border-top-color:var(--gold);}
+.sc-green{border-top-color:var(--green);}
+.sc-blue{border-top-color:var(--blue);}
+.sc-purple{border-top-color:var(--purple);}
+.sc-ico{font-size:1.8rem;margin-bottom:.6rem;}
+.sc-val{font-family:"Bebas Neue",sans-serif;font-size:2.2rem;line-height:1;}
+.sc-lbl{font-size:.68rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:.3rem;}
+.sc-trend{font-size:.68rem;font-weight:700;margin-top:.3rem;}
+.up{color:var(--green);}
+.dn{color:var(--red);}
+
+/* CARD */
+.card{background:#fff;border-radius:12px;box-shadow:var(--shadow);overflow:hidden;margin-bottom:1.2rem;}
+.card-h{padding:1.1rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;}
+.card-t{font-weight:800;font-size:.92rem;}
+.card-acts{display:flex;gap:.5rem;align-items:center;}
+
+/* BTN */
+.btn{padding:8px 16px;border-radius:7px;font-size:.76rem;font-weight:800;cursor:pointer;border:none;font-family:"Nunito",sans-serif;transition:all .3s;display:inline-flex;align-items:center;gap:.3rem;}
+.btn-red{background:var(--red);color:#fff;}
+.btn-red:hover{background:#b8001a;transform:translateY(-1px);}
+.btn-green{background:var(--green);color:#fff;}
+.btn-green:hover{background:#146622;transform:translateY(-1px);}
+.btn-gold{background:var(--gold);color:#fff;}
+.btn-gold:hover{background:#cc8c00;transform:translateY(-1px);}
+.btn-blue{background:var(--blue);color:#fff;}
+.btn-purple{background:var(--purple);color:#fff;}
+.btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--red);color:var(--red);}
+.btn-sm{padding:5px 12px;font-size:.7rem;}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:.82rem;}
+th{padding:.8rem 1rem;text-align:left;font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);background:#FAFAFA;border-bottom:1px solid var(--border);white-space:nowrap;}
+td{padding:.85rem 1rem;border-bottom:1px solid var(--border);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:#FAFBFF;}
+
+/* BADGE */
+.badge{display:inline-flex;align-items:center;gap:.25rem;padding:3px 10px;border-radius:20px;font-size:.66rem;font-weight:800;white-space:nowrap;}
+.b-new{background:rgba(59,130,246,.12);color:#2563EB;}
+.b-affect{background:rgba(139,92,246,.12);color:var(--purple);}
+.b-confirm{background:rgba(245,168,0,.12);color:#D97706;}
+.b-livraison{background:rgba(26,138,46,.12);color:var(--green);}
+.b-livre{background:rgba(26,138,46,.2);color:var(--green);}
+.b-reporte{background:rgba(249,115,22,.12);color:var(--orange);}
+.b-annule{background:rgba(232,0,28,.12);color:var(--red);}
+.b-injoignable{background:rgba(107,114,128,.12);color:var(--muted);}
+
+/* FORM */
+.fg{margin-bottom:1.1rem;}
+.fg label{display:block;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:.4rem;}
+.fg input,.fg select,.fg textarea{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:8px;font-family:"Nunito",sans-serif;font-size:.9rem;outline:none;transition:border-color .3s;background:#fff;color:var(--dark);}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--red);box-shadow:0 0 0 3px rgba(232,0,28,.08);}
+.fg select option{background:#fff;}
+.fg textarea{resize:vertical;min-height:80px;}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.frow3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;}
+
+/* FILTERS */
+.filters{display:flex;gap:.6rem;padding:1rem 1.5rem;border-bottom:1px solid var(--border);flex-wrap:wrap;}
+.fi{padding:7px 12px;border:1.5px solid var(--border);border-radius:7px;font-family:"Nunito",sans-serif;font-size:.78rem;font-weight:700;outline:none;color:var(--dark);background:#fff;cursor:pointer;}
+.fi:focus{border-color:var(--red);}
+.search{width:220px;}
+
+/* AGENT CARDS */
+.agents-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:1.2rem;padding:1.5rem;}
+.agent-card{background:#fff;border:1.5px solid var(--border);border-radius:14px;padding:1.5rem;text-align:center;box-shadow:var(--shadow);transition:all .3s;position:relative;}
+.agent-card:hover{border-color:var(--gold);transform:translateY(-4px);box-shadow:var(--shadow-lg);}
+.agent-av{width:55px;height:55px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;font-size:1.1rem;margin:0 auto .8rem;}
+.agent-name{font-weight:900;font-size:.95rem;margin-bottom:.2rem;}
+.agent-role-tag{font-size:.68rem;font-weight:700;padding:3px 10px;border-radius:20px;display:inline-block;margin-bottom:.8rem;}
+.online-ind{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:.3rem;border:2px solid #fff;box-shadow:0 0 0 1px currentColor;}
+.agent-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.4rem;margin:.8rem 0;}
+.ags{background:var(--bg);border-radius:6px;padding:.4rem .2rem;text-align:center;}
+.ags-n{font-family:"Bebas Neue",sans-serif;font-size:1.1rem;color:var(--dark);}
+.ags-l{font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;}
+.agent-card-acts{display:flex;gap:.4rem;justify-content:center;flex-wrap:wrap;}
+.del-btn{position:absolute;top:.6rem;right:.6rem;background:rgba(232,0,28,.08);border:none;color:var(--red);width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:.7rem;display:flex;align-items:center;justify-content:center;transition:background .3s;}
+.del-btn:hover{background:var(--red);color:#fff;}
+
+/* PRODUITS GRID */
+.prod-admin-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1.2rem;padding:1.5rem;}
+.prod-admin-card{background:#fff;border:1.5px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow);transition:all .3s;}
+.prod-admin-card:hover{border-color:var(--gold);transform:translateY(-3px);}
+.pac-img{height:130px;background:linear-gradient(135deg,#FFF8F0,#FFF0D0);display:flex;align-items:center;justify-content:center;font-size:4rem;position:relative;}
+.pac-stock{position:absolute;top:.5rem;right:.5rem;font-size:.62rem;font-weight:800;padding:3px 8px;border-radius:20px;}
+.pac-body{padding:1rem;}
+.pac-cat{font-size:.6rem;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-bottom:.3rem;}
+.pac-name{font-weight:800;font-size:.9rem;margin-bottom:.4rem;color:var(--dark);}
+.pac-prix{font-family:"Bebas Neue",sans-serif;font-size:1.2rem;color:var(--red);margin-bottom:.6rem;}
+.pac-acts{display:flex;gap:.4rem;}
+
+/* SITE EDITOR */
+.site-sections{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;}
+.site-sec{background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:1.5rem;box-shadow:var(--shadow);}
+.site-sec h3{font-weight:800;font-size:.95rem;margin-bottom:1.2rem;display:flex;align-items:center;gap:.5rem;padding-bottom:.8rem;border-bottom:1px solid var(--border);}
+.preview-box{background:var(--bg);border:1px dashed var(--border);border-radius:8px;padding:1rem;font-size:.82rem;color:var(--muted);margin-top:.8rem;line-height:1.7;}
+
+/* KANBAN AGENT */
+.kanban{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.2rem;}
+.k-col{background:var(--bg);border-radius:12px;padding:1rem;}
+.k-col-h{font-weight:800;font-size:.85rem;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between;}
+.k-cnt{font-size:.68rem;font-weight:800;padding:2px 8px;border-radius:10px;}
+.k-card{background:#fff;border-radius:10px;padding:1rem;margin-bottom:.7rem;border-left:3px solid;box-shadow:var(--shadow);cursor:pointer;transition:all .3s;}
+.k-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);}
+.k-id{font-size:.68rem;font-weight:800;color:var(--muted);}
+.k-client{font-weight:800;font-size:.9rem;margin:.2rem 0;}
+.k-prod{font-size:.78rem;color:var(--muted);}
+.k-prix{font-family:"Bebas Neue",sans-serif;font-size:1.1rem;color:var(--red);margin-top:.3rem;}
+
+/* MODAL */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+.overlay.show{display:flex;}
+.modal{background:#fff;border-radius:16px;padding:2rem;width:90%;box-shadow:0 25px 80px rgba(0,0,0,.25);animation:zi .3s ease;max-height:90vh;overflow-y:auto;}
+.modal-sm{max-width:480px;}
+.modal-md{max-width:580px;}
+.modal-lg{max-width:750px;}
+.modal h3{font-family:"Bebas Neue",sans-serif;font-size:1.4rem;letter-spacing:1px;margin-bottom:1.5rem;color:var(--dark);}
+.modal-foot{display:flex;gap:.7rem;justify-content:flex-end;flex-wrap:wrap;margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--border);}
+@keyframes zi{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+
+/* STATUS OPTIONS */
+.status-opts{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin:.5rem 0 1rem;}
+.so{border:2px solid var(--border);border-radius:8px;padding:.7rem;cursor:pointer;transition:all .3s;text-align:center;font-size:.75rem;font-weight:800;}
+.so:hover,.so.picked{color:#fff;}
+.so-confirm{border-color:var(--gold);color:var(--gold);}
+.so-confirm:hover,.so-confirm.picked{background:var(--gold);}
+.so-livre{border-color:var(--green);color:var(--green);}
+.so-livre:hover,.so-livre.picked{background:var(--green);}
+.so-livraison{border-color:var(--blue);color:var(--blue);}
+.so-livraison:hover,.so-livraison.picked{background:var(--blue);}
+.so-reporte{border-color:var(--orange);color:var(--orange);}
+.so-reporte:hover,.so-reporte.picked{background:var(--orange);}
+.so-injoignable{border-color:var(--muted);color:var(--muted);}
+.so-injoignable:hover,.so-injoignable.picked{background:var(--muted);}
+.so-annule{border-color:var(--red);color:var(--red);}
+.so-annule:hover,.so-annule.picked{background:var(--red);}
+
+/* PERF BAR */
+.perf-bar-wrap{background:var(--bg);border-radius:4px;height:6px;margin:.4rem 0 .2rem;}
+.perf-bar{height:6px;border-radius:4px;background:linear-gradient(90deg,var(--green),var(--gold));transition:width .6s ease;}
+
+/* CHART */
+.chart{display:flex;align-items:flex-end;gap:.5rem;height:100px;padding:.5rem 1.5rem 0;}
+.cb-w{flex:1;display:flex;flex-direction:column;align-items:center;gap:.2rem;}
+.cb{width:100%;border-radius:3px 3px 0 0;transition:height .5s;}
+.cb-l{font-size:.6rem;color:var(--muted);font-weight:700;}
+
+/* TOAST */
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;padding:.9rem 1.4rem;border-radius:10px;font-size:.83rem;font-weight:700;z-index:9999;display:none;align-items:center;gap:.6rem;box-shadow:var(--shadow-lg);animation:sIn .3s ease;max-width:360px;}
+.toast.show{display:flex;}
+.t-ok{background:#111;color:#fff;}
+.t-warn{background:var(--orange);color:#fff;}
+.t-err{background:var(--red);color:#fff;}
+@keyframes sIn{from{transform:translateX(110%)}to{transform:translateX(0)}}
+
+/* RESPONSIVE */
+@media(max-width:1024px){.sg{grid-template-columns:repeat(3,1fr);}.site-sections{grid-template-columns:1fr;}}
+@media(max-width:768px){.layout{grid-template-columns:1fr;}.sidebar{display:none;}.sg{grid-template-columns:repeat(2,1fr);}.frow,.frow3{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">🏪 HPSHOP</div>
+    <div class="login-sub">Espace Administration Interne</div>
+    <div class="login-fg"><label>Identifiant</label><input type="text" id="lu" placeholder="Votre identifiant"></div>
+    <div class="login-fg"><label>Mot de passe</label><input type="password" id="lp" placeholder="••••••••"></div>
+    <button class="login-btn" onclick="doLogin()">ACCÉDER</button>
+    <div class="demo-hint">
+      👑 CEO : <b>ceo</b> / <b>hpshop2026</b> <span class="role-badge rb-ceo">Accès total</span><br>
+      📊 Superviseur : <b>super</b> / <b>hpshop2026</b> <span class="role-badge rb-sup">Affectations</span><br>
+      🧑 Agent : <b>agent01</b>→<b>06</b> / <b>hpshop2026</b> <span class="role-badge rb-agent">Mes commandes</span>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="layout" id="app" style="display:none">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-main">HPSHOP</div>
+      <div class="sb-logo-sub">Administration</div>
+    </div>
+    <div class="sb-user">
+      <div class="sb-av" id="sbAv"></div>
+      <div>
+        <div class="sb-uname" id="sbName"></div>
+        <div class="sb-urole" id="sbRole"></div>
+      </div>
+    </div>
+    <div class="sb-nav" id="sbNav"></div>
+    <div class="sb-bot"><div class="sb-logout" onclick="logout()">🚪 &nbsp;Déconnexion</div></div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div class="tb-title" id="tbTitle">Tableau de bord</div>
+      <div class="tb-right">
+        <div class="tb-tag" id="tbTag"></div>
+        <button style="background:var(--bg);border:1.5px solid var(--border);width:38px;height:38px;border-radius:8px;cursor:pointer;font-size:1rem;position:relative;" onclick="toast('🔔 Pas de nouvelles notifications','ok')">🔔</button>
+      </div>
+    </div>
+
+    <!-- CEO PAGES -->
+    <div class="page on" id="pg-ceo-dash">
+      <div class="sg" id="ceoStats"></div>
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:1.2rem;margin-bottom:1.2rem;">
+        <div class="card">
+          <div class="card-h"><span class="card-t">📈 Ventes 7 derniers jours</span></div>
+          <div class="chart" id="ceoChart"></div>
+          <div style="display:flex;justify-content:space-between;padding:.6rem 1.5rem;border-top:1px solid var(--border);font-size:.72rem;">
+            <span style="color:var(--muted)">Commandes par jour</span>
+            <span style="color:var(--green);font-weight:800">↑ +23% cette semaine</span>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="card-t">📊 Répartition statuts</span></div>
+          <div style="padding:1rem;" id="ceoStatusRep"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-h">
+          <span class="card-t">🆕 Dernières commandes</span>
+          <div class="card-acts">
+            <button class="btn btn-gold btn-sm" onclick="showPg('ceo-orders',null)">Voir tout →</button>
+          </div>
+        </div>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>#</th><th>Client</th><th>Produit</th><th>Ville</th><th>Montant</th><th>Agent</th><th>Statut</th><th>Actions</th></tr></thead>
+          <tbody id="ceoRecentTbl"></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="page" id="pg-ceo-orders">
+      <div class="card">
+        <div class="card-h">
+          <span class="card-t">📦 Toutes les commandes</span>
+          <div class="card-acts">
+            <button class="btn btn-green btn-sm" onclick="exportWA()">💬 WhatsApp</button>
+            <button class="btn btn-outline btn-sm" onclick="exportCSV()">📥 CSV</button>
+          </div>
+        </div>
+        <div class="filters">
+          <input class="fi search" type="text" placeholder="🔍 Client, ID..." oninput="filterOrders(this.value)">
+          <select class="fi" onchange="filterOrdersStatus(this.value)">
+            <option value="all">Tous statuts</option>
+            <option>Nouvelle</option><option>Affectée</option><option>Confirmée</option>
+            <option>En livraison</option><option>Livrée</option><option>Reportée</option>
+            <option>Injoignable</option><option>Annulée</option>
+          </select>
+          <select class="fi" onchange="filterOrdersAgent(this.value)" id="agentFil">
+            <option value="all">Tous agents</option>
+          </select>
+        </div>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>#</th><th>Date</th><th>Client</th><th>Tél</th><th>Produit</th><th>Ville</th><th>Montant</th><th>Paiement</th><th>Agent</th><th>Statut</th><th>Note</th><th>Actions</th></tr></thead>
+          <tbody id="allOrdersTbl"></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="page" id="pg-ceo-agents">
+      <div class="card">
+        <div class="card-h">
+          <span class="card-t">👥 Gestion des agents</span>
+          <button class="btn btn-red" onclick="openAddAgent()">+ Ajouter un agent</button>
+        </div>
+        <div class="agents-grid" id="agentsGrid"></div>
+      </div>
+    </div>
+
+    <div class="page" id="pg-ceo-produits">
+      <div class="card">
+        <div class="card-h">
+          <span class="card-t">🛍 Gestion des produits</span>
+          <button class="btn btn-red" onclick="openAddProd()">+ Ajouter un produit</button>
+        </div>
+        <div class="prod-admin-grid" id="prodAdminGrid"></div>
+      </div>
+    </div>
+
+    <div class="page" id="pg-ceo-site">
+      <div class="card" style="margin-bottom:1.2rem">
+        <div class="card-h">
+          <span class="card-t">🌐 Éditeur du site HPSHOP</span>
+          <button class="btn btn-green" onclick="toast('✅ Modifications sauvegardées et appliquées au site !','ok')">💾 Sauvegarder</button>
+        </div>
+        <div style="padding:1.2rem;">
+          <div class="site-sections">
+            <div class="site-sec">
+              <h3>🏠 Section Hero (Accueil)</h3>
+              <div class="fg"><label>Titre principal</label><input type="text" id="siteTitle" value="LA BOUTIQUE DE LA BONNE FORTUNE"></div>
+              <div class="fg"><label>Sous-titre</label><textarea id="siteSub">Des produits sélectionnés pour améliorer votre quotidien. Commandez en ligne, payez cash à la livraison.</textarea></div>
+              <div class="fg"><label>Slogan ticker</label><input type="text" id="siteTicker" value="Livraison Gratuite Partout en Guinée"></div>
+              <div class="preview-box" id="prevHero"></div>
+            </div>
+            <div class="site-sec">
+              <h3>📞 Informations contact</h3>
+              <div class="fg"><label>Numéro WhatsApp</label><input type="text" id="siteWA" value="+224 XXXXXXXX"></div>
+              <div class="fg"><label>Numéro téléphone</label><input type="text" id="siteTel" value="+224 XXXXXXXX"></div>
+              <div class="fg"><label>Adresse</label><input type="text" id="siteAddr" value="Kaloum, Conakry, Guinée"></div>
+              <div class="fg"><label>Lien Facebook</label><input type="text" id="siteFB" value="facebook.com/hpshop"></div>
+              <div class="fg"><label>Lien Instagram</label><input type="text" id="siteIG" value="instagram.com/hpshop"></div>
+            </div>
+            <div class="site-sec">
+              <h3>🚚 Livraison & Paiement</h3>
+              <div class="fg"><label>Délai livraison affiché</label><input type="text" id="siteDelai" value="24–48h"></div>
+              <div class="fg"><label>Message livraison gratuite</label><input type="text" id="siteLivMsg" value="Livraison GRATUITE partout en Guinée"></div>
+              <div class="fg"><label>Partenaire livraison</label><input type="text" id="sitePartner" value="Rapido"></div>
+              <div class="fg"><label>Modes paiement (séparés par virgule)</label><input type="text" id="sitePay" value="Cash livraison, Orange Money, Soutrat Money, MTN MoMo, Wave"></div>
+            </div>
+            <div class="site-sec">
+              <h3>🎨 Apparence</h3>
+              <div class="fg"><label>Couleur principale</label><input type="color" id="siteColor1" value="#E8001C" style="height:42px;cursor:pointer;"></div>
+              <div class="fg"><label>Couleur secondaire</label><input type="color" id="siteColor2" value="#F5A800" style="height:42px;cursor:pointer;"></div>
+              <div class="fg"><label>Couleur tertiaire</label><input type="color" id="siteColor3" value="#1A8A2E" style="height:42px;cursor:pointer;"></div>
+              <div class="fg"><label>Message bas de page</label><input type="text" id="siteFooter" value="© 2026 HPSHOP Afrique — Conakry, Guinée 🇬🇳"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUP PAGES -->
+    <div class="page" id="pg-sup-dash">
+      <div class="sg" id="supStats"></div>
+      <div class="card">
+        <div class="card-h">
+          <span class="card-t">🆕 Commandes à affecter</span>
+          <div class="card-acts">
+            <span id="supNewCount" style="font-size:.78rem;font-weight:800;color:var(--red)"></span>
+            <button class="btn btn-gold btn-sm" onclick="autoAffect()">⚡ Affecter automatiquement</button>
+          </div>
+        </div>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>#</th><th>Heure</th><th>Client</th><th>Tél</th><th>Produit</th><th>Ville</th><th>Montant</th><th>Paiement</th><th>Statut</th><th>Agent affecté</th><th>Actions</th></tr></thead>
+          <tbody id="supNewTbl"></tbody>
+        </table></div>
+      </div>
+      <div class="card">
+        <div class="card-h"><span class="card-t">📊 Performance agents en temps réel</span></div>
+        <div style="padding:1.2rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;" id="supPerfGrid"></div>
+      </div>
+    </div>
+
+    <div class="page" id="pg-sup-all">
+      <div class="card">
+        <div class="card-h"><span class="card-t">📦 Toutes les commandes</span></div>
+        <div class="filters">
+          <input class="fi search" type="text" placeholder="🔍 Rechercher..." oninput="filterSupAll(this.value)">
+          <select class="fi" onchange="filterSupStatus(this.value)">
+            <option value="all">Tous statuts</option>
+            <option>Nouvelle</option><option>Affectée</option><option>Confirmée</option>
+            <option>En livraison</option><option>Livrée</option><option>Reportée</option>
+            <option>Injoignable</option><option>Annulée</option>
+          </select>
+        </div>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>#</th><th>Client</th><th>Produit</th><th>Ville</th><th>Montant</th><th>Agent</th><th>Statut</th><th>Note</th><th>Actions</th></tr></thead>
+          <tbody id="supAllTbl"></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- AGENT PAGE -->
+    <div class="page" id="pg-agent">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem;">
+        <div>
+          <h2 style="font-family:Bebas Neue,sans-serif;font-size:1.5rem;letter-spacing:1px">Mes commandes</h2>
+          <p style="font-size:.8rem;color:var(--muted)" id="agentInfo"></p>
+        </div>
+        <button class="btn btn-green" onclick="sendManagerWA()">💬 Contacter superviseur</button>
+      </div>
+      <div class="kanban" id="agentKanban"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL AFFECTER -->
+<div class="overlay" id="affectOverlay">
+  <div class="modal modal-lg">
+    <h3>🎯 Affecter commande <span id="affId" style="color:var(--red)"></span></h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:1.2rem;background:var(--bg);padding:1rem;border-radius:8px;" id="affDetail"></div>
+    <p style="font-size:.75rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:.8rem;">Sélectionner un agent :</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;" id="agentChoiceGrid"></div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeOverlays()">Annuler</button>
+      <button class="btn btn-gold" onclick="confirmAffect()">✅ Affecter</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL STATUT -->
+<div class="overlay" id="statusOverlay">
+  <div class="modal modal-md">
+    <h3>✏️ Mise à jour <span id="stId" style="color:var(--red)"></span></h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:1rem;background:var(--bg);padding:.8rem;border-radius:8px;" id="stDetail"></div>
+    <p style="font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:.5rem;">Nouveau statut :</p>
+    <div class="status-opts" id="statusOpts"></div>
+    <div class="fg"><label>Note / Commentaire</label><textarea id="stNote" placeholder="Ex: Client rappelé à 14h, livraison reportée au lendemain..."></textarea></div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeOverlays()">Annuler</button>
+      <button class="btn btn-red" onclick="confirmStatus()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL AJOUTER AGENT -->
+<div class="overlay" id="addAgentOverlay">
+  <div class="modal modal-md">
+    <h3 id="addAgentTitle">➕ Ajouter un agent</h3>
+    <div class="frow">
+      <div class="fg"><label>Prénom & Nom *</label><input type="text" id="agNom" placeholder="Ex: Mamadou Bah"></div>
+      <div class="fg"><label>Rôle *</label>
+        <select id="agRole">
+          <option value="agent">🧑 Agent</option>
+          <option value="super">📊 Superviseur</option>
+        </select>
+      </div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label>Identifiant de connexion *</label><input type="text" id="agId" placeholder="Ex: agent07"></div>
+      <div class="fg"><label>Mot de passe *</label><input type="password" id="agPass" placeholder="Minimum 6 caractères"></div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label>Téléphone</label><input type="text" id="agTel" placeholder="+224 6XX XXX XXX"></div>
+      <div class="fg"><label>Zone / Secteur</label><input type="text" id="agZone" placeholder="Ex: Conakry Centre"></div>
+    </div>
+    <div class="fg"><label>Couleur profil</label><input type="color" id="agColor" value="#E8001C" style="height:40px;cursor:pointer;"></div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeOverlays()">Annuler</button>
+      <button class="btn btn-red" onclick="saveAgent()">💾 Sauvegarder</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PRODUIT -->
+<div class="overlay" id="addProdOverlay">
+  <div class="modal modal-lg">
+    <h3 id="addProdTitle">➕ Ajouter / Modifier un produit</h3>
+    <div class="frow">
+      <div class="fg"><label>Nom du produit *</label><input type="text" id="prNom" placeholder="Ex: Fer à Lisser Pro"></div>
+      <div class="fg"><label>Catégorie *</label>
+        <select id="prCat">
+          <option value="beaute">💄 Beauté & Soin</option>
+          <option value="maison">🏠 Maison & Cuisine</option>
+          <option value="tech">📱 Tech & Gadgets</option>
+          <option value="sante">💪 Santé & Sport</option>
+          <option value="mode">👗 Mode</option>
+          <option value="enfant">🧒 Enfants</option>
+        </select>
+      </div>
+    </div>
+    <div class="frow3">
+      <div class="fg"><label>Prix de vente (GNF) *</label><input type="number" id="prPrix" placeholder="Ex: 185000"></div>
+      <div class="fg"><label>Prix barré (GNF)</label><input type="number" id="prOld" placeholder="Ex: 270000"></div>
+      <div class="fg"><label>Stock initial *</label><input type="number" id="prStock" placeholder="Ex: 10"></div>
+    </div>
+    <div class="fg"><label>Emoji produit</label><input type="text" id="prEmoji" placeholder="Ex: 💇‍♀️" style="font-size:1.5rem;"></div>
+    <div class="fg"><label>Description *</label><textarea id="prDesc" placeholder="Décrivez le produit en détail : caractéristiques, avantages, utilisation..."></textarea></div>
+    <div class="fg"><label>Badge</label>
+      <select id="prBadge">
+        <option value="">Aucun badge</option>
+        <option value="chaud">🔥 Chaud</option>
+        <option value="new">✨ Nouveau</option>
+        <option value="top">⭐ Top</option>
+      </select>
+    </div>
+    <div class="fg"><label>URL Photo (optionnel)</label><input type="text" id="prPhoto" placeholder="https://... ou laissez vide pour utiliser l'emoji"></div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeOverlays()">Annuler</button>
+      <button class="btn btn-red" onclick="saveProd()">💾 Sauvegarder le produit</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toastEl"></div>
+
+<script>
+// ════════════════════════════════════
+// DONNÉES
+// ════════════════════════════════════
+let USERS = [
+  {id:"ceo",pass:"hpshop2026",name:"CEO HPSHOP",role:"ceo",color:"#F5A800"},
+  {id:"super",pass:"hpshop2026",name:"Superviseur Général",role:"super",color:"#8B5CF6"},
+  {id:"agent01",pass:"hpshop2026",name:"Mamadou Bah",role:"agent",color:"#E8001C",tel:"",zone:"Conakry"},
+  {id:"agent02",pass:"hpshop2026",name:"Fatoumata Diallo",role:"agent",color:"#1A8A2E",tel:"",zone:"Conakry"},
+  {id:"agent03",pass:"hpshop2026",name:"Ibrahima Sow",role:"agent",color:"#3B82F6",tel:"",zone:"Kindia"},
+  {id:"agent04",pass:"hpshop2026",name:"Aïssatou Camara",role:"agent",color:"#8B5CF6",tel:"",zone:"Conakry"},
+  {id:"agent05",pass:"hpshop2026",name:"Seydou Kouyaté",role:"agent",color:"#F97316",tel:"",zone:"Labé"},
+  {id:"agent06",pass:"hpshop2026",name:"Kadiatou Barry",role:"agent",color:"#EC4899",tel:"",zone:"Conakry"},
+];
+
+let PRODUITS = [
+  {id:1,nom:"Fer à Lisser Céramique Pro",cat:"beaute",emoji:"💇‍♀️",prix:185000,old:270000,stock:15,badge:"chaud",desc:"Lisseur céramique infrarouge professionnel."},
+  {id:2,nom:"Montre Connectée GPS Sport",cat:"tech",emoji:"⌚",prix:210000,old:310000,stock:8,badge:"chaud",desc:"Montre GPS avec suivi santé complet."},
+  {id:3,nom:"Climatiseur Portable sans Tuyau",cat:"maison",emoji:"❄️",prix:250000,old:370000,stock:5,badge:"new",desc:"Refroidit, humidifie et purifie l'air."},
+  {id:4,nom:"Drone Caméra 4K Pliable GPS",cat:"tech",emoji:"🚁",prix:240000,old:350000,stock:3,badge:"new",desc:"Caméra 4K stabilisée, autonomie 25 min."},
+  {id:5,nom:"Robot Cuiseur Multifonction 5L",cat:"maison",emoji:"🍳",prix:220000,old:320000,stock:12,badge:"chaud",desc:"Cuit, mijote, frits, vapeur."},
+  {id:6,nom:"Blender Pro 1500W",cat:"maison",emoji:"🥤",prix:185000,old:270000,stock:0,badge:"",desc:"Moteur 1500W, broie tout."},
+  {id:7,nom:"Kit Soin Visage 5 en 1",cat:"beaute",emoji:"✨",prix:200000,old:300000,stock:20,badge:"top",desc:"Nettoyant, tonique, sérum, crème, masque."},
+  {id:8,nom:"Vélo Appartement Pliable",cat:"sante",emoji:"🚴",prix:245000,old:350000,stock:4,badge:"",desc:"8 niveaux de résistance, pliable."},
+];
+
+const NOMS=["Fatoumata K.","Mamadou B.","Aïssatou M.","Seydou D.","Kadiatou S.","Ibrahim C.","Mariama T.","Oumar L.","Aminata F.","Boubacar D."];
+const VILLES=["Conakry","Conakry","Conakry","Kindia","Labé","Kankan","Mamou"];
+const PAYS=["Cash livraison","Orange Money","Soutrat Money","MTN MoMo","Wave"];
+const QUARTIERS=["Ratoma","Kaloum","Matam","Dixinn","Matoto"];
+const STATUTS_D=["Nouvelle","Nouvelle","Affectée","Confirmée","En livraison","Livrée","Reportée","Injoignable","Annulée"];
+const AGENTS_LIST = ()=>USERS.filter(u=>u.role==="agent");
+const ST_MAP = {
+  "Nouvelle":{cls:"b-new",label:"🆕 Nouvelle"},
+  "Affectée":{cls:"b-affect",label:"🎯 Affectée"},
+  "Confirmée":{cls:"b-confirm",label:"✅ Confirmée"},
+  "En livraison":{cls:"b-livraison",label:"🚚 En livraison"},
+  "Livrée":{cls:"b-livre",label:"📬 Livrée"},
+  "Reportée":{cls:"b-reporte",label:"⏳ Reportée"},
+  "Injoignable":{cls:"b-injoignable",label:"📵 Injoignable"},
+  "Annulée":{cls:"b-annule",label:"❌ Annulée"},
+};
+
+// Générer commandes démo
+let orders=[];
+for(let i=1;i<=45;i++){
+  const p=PRODUITS[Math.floor(Math.random()*PRODUITS.length)];
+  const st=STATUTS_D[Math.floor(Math.random()*STATUTS_D.length)];
+  const agents=AGENTS_LIST();
+  const ag=st!=="Nouvelle"?agents[Math.floor(Math.random()*agents.length)]:null;
+  const h=String(Math.floor(Math.random()*10)+8).padStart(2,"0");
+  const m=String(Math.floor(Math.random()*60)).padStart(2,"0");
+  orders.push({
+    id:"HP"+String(i).padStart(4,"0"),
+    date:`26/04/2026 ${h}:${m}`,
+    client:NOMS[Math.floor(Math.random()*NOMS.length)],
+    tel:`6${Math.floor(Math.random()*3)+2}${String(Math.floor(Math.random()*9000000)+1000000)}`,
+    produit:p.nom,emoji:p.emoji,prix:p.prix,
+    ville:VILLES[Math.floor(Math.random()*VILLES.length)],
+    adresse:"Quartier "+QUARTIERS[Math.floor(Math.random()*QUARTIERS.length)],
+    paiement:PAYS[Math.floor(Math.random()*PAYS.length)],
+    statut:st,agent:ag?ag.id:null,agentName:ag?ag.name:null,note:""
+  });
+}
+
+let currentUser=null,targetOId=null,pickedAg=null,pickedSt=null,editAgentId=null,editProdId=null;
+
+// ════════════════════════════════════
+// LOGIN
+// ════════════════════════════════════
+function doLogin(){
+  const u=document.getElementById("lu").value.trim();
+  const p=document.getElementById("lp").value.trim();
+  const user=USERS.find(x=>x.id===u&&x.pass===p);
+  if(!user){toast("❌ Identifiant ou mot de passe incorrect","err");return;}
+  currentUser=user;
+  document.getElementById("loginScreen").style.display="none";
+  document.getElementById("app").style.display="grid";
+  initApp();
+}
+document.addEventListener("keydown",e=>{if(e.key==="Enter")doLogin();});
+function logout(){
+  currentUser=null;
+  document.getElementById("loginScreen").style.display="flex";
+  document.getElementById("app").style.display="none";
+  document.getElementById("lu").value="";document.getElementById("lp").value="";
+}
+
+// ════════════════════════════════════
+// INIT
+// ════════════════════════════════════
+function initApp(){
+  const u=currentUser;
+  const init=u.name.split(" ").map(n=>n[0]).join("").slice(0,2).toUpperCase();
+  const sbAv=document.getElementById("sbAv");
+  sbAv.textContent=init;
+  sbAv.style.background=`linear-gradient(135deg,${u.color},${u.color}88)`;
+  document.getElementById("sbName").textContent=u.name;
+  const roleLabels={ceo:"👑 CEO — Accès Total",super:"📊 Superviseur",agent:"🧑 Agent"};
+  document.getElementById("sbRole").textContent=roleLabels[u.role];
+  const tagCls={ceo:"tag-ceo",super:"tag-sup",agent:"tag-agent"};
+  const tagTxt={ceo:"👑 CEO",super:"📊 Superviseur",agent:"🧑 Agent"};
+  document.getElementById("tbTag").className="tb-tag "+tagCls[u.role];
+  document.getElementById("tbTag").textContent=tagTxt[u.role];
+
+  if(u.role==="ceo") setupCEO();
+  else if(u.role==="super") setupSup();
+  else setupAgent();
+}
+
+// ════════════════════════════════════
+// CEO
+// ════════════════════════════════════
+function setupCEO(){
+  document.getElementById("sbNav").innerHTML=`
+    <div class="sb-sec">Vue globale</div>
+    <div class="sb-link on" onclick="showPg('ceo-dash',this)"><span class="sb-ico">📊</span>Tableau de bord</div>
+    <div class="sb-link" onclick="showPg('ceo-orders',this)"><span class="sb-ico">📦</span>Commandes<span class="sb-badge">${orders.filter(o=>o.statut==="Nouvelle").length}</span></div>
+    <div class="sb-sec">Gestion</div>
+    <div class="sb-link" onclick="showPg('ceo-agents',this)"><span class="sb-ico">👥</span>Agents & Accès</div>
+    <div class="sb-link" onclick="showPg('ceo-produits',this)"><span class="sb-ico">🛍</span>Produits</div>
+    <div class="sb-link" onclick="showPg('ceo-site',this)"><span class="sb-ico">🌐</span>Éditeur site</div>`;
+  renderCEODash();
+  renderAllOrdersCEO(orders);
+  renderAgentsGrid();
+  renderProduitsAdmin();
+  populateAgentFilter();
+  updateSitePreview();
+}
+
+function renderCEODash(){
+  const total=orders.length,nouvelles=orders.filter(o=>o.statut==="Nouvelle").length;
+  const livrees=orders.filter(o=>o.statut==="Livrée").length;
+  const pb=orders.filter(o=>["Reportée","Injoignable","Annulée"].includes(o.statut)).length;
+  const ca=orders.filter(o=>o.statut==="Livrée").reduce((s,o)=>s+o.prix,0);
+  document.getElementById("ceoStats").innerHTML=`
+    <div class="sc sc-blue"><div class="sc-ico">📦</div><div class="sc-val">${total}</div><div class="sc-lbl">Total</div></div>
+    <div class="sc sc-red"><div class="sc-ico">🆕</div><div class="sc-val">${nouvelles}</div><div class="sc-lbl">À affecter</div><div class="sc-trend dn">⚠️ Urgent</div></div>
+    <div class="sc sc-gold"><div class="sc-ico">⚙️</div><div class="sc-val">${orders.filter(o=>["Affectée","Confirmée","En livraison"].includes(o.statut)).length}</div><div class="sc-lbl">En cours</div></div>
+    <div class="sc sc-green"><div class="sc-ico">📬</div><div class="sc-val">${livrees}</div><div class="sc-lbl">Livrées</div><div class="sc-trend up">↑${Math.round(livrees/total*100)}%</div></div>
+    <div class="sc sc-purple"><div class="sc-ico">💰</div><div class="sc-val">${(ca/1000000).toFixed(1)}M</div><div class="sc-lbl">CA GNF</div></div>`;
+
+  const days=["Lun","Mar","Mer","Jeu","Ven","Sam","Auj"];
+  const vals=[5,8,6,12,9,15,nouvelles];
+  const max=Math.max(...vals)||1;
+  document.getElementById("ceoChart").innerHTML=vals.map((v,i)=>`
+    <div class="cb-w">
+      <div class="cb" style="height:${Math.max(4,(v/max)*85)}px;background:${i===6?"var(--red)":"linear-gradient(to top,var(--red),var(--gold))"}"></div>
+      <div class="cb-l">${days[i]}</div>
+    </div>`).join("");
+
+  const counts={};
+  Object.keys(ST_MAP).forEach(k=>{counts[k]=orders.filter(o=>o.statut===k).length;});
+  document.getElementById("ceoStatusRep").innerHTML=Object.entries(counts).filter(([,v])=>v>0).map(([k,v])=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:.35rem 0;border-bottom:1px solid var(--border);">
+      <span class="badge ${ST_MAP[k].cls}">${ST_MAP[k].label}</span>
+      <b style="font-family:Bebas Neue,sans-serif;font-size:1.1rem">${v}</b>
+    </div>`).join("");
+
+  document.getElementById("ceoRecentTbl").innerHTML=orders.slice(0,7).map(o=>orderRow(o,"ceo-simple")).join("");
+}
+
+function orderRow(o,mode="full"){
+  const s=ST_MAP[o.statut]||{cls:"b-new",label:o.statut};
+  if(mode==="ceo-simple") return `<tr>
+    <td><b style="color:var(--red)">${o.id}</b></td>
+    <td><b>${o.client}</b></td>
+    <td>${o.emoji} ${o.produit}</td>
+    <td>${o.ville}</td>
+    <td style="font-family:Bebas Neue,sans-serif;color:var(--red)">${o.prix.toLocaleString("fr")} GNF</td>
+    <td style="font-size:.75rem">${o.agentName||"<i style='color:var(--muted)'>Non affecté</i>"}</td>
+    <td><span class="badge ${s.cls}">${s.label}</span></td>
+    <td><div style="display:flex;gap:.3rem">
+      ${o.statut==="Nouvelle"?`<button class="btn btn-gold btn-sm" onclick="openAffect('${o.id}')">🎯</button>`:""}
+      <button class="btn btn-outline btn-sm" onclick="openStatus('${o.id}')">✏️</button>
+      <button class="btn btn-green btn-sm" onclick="sendWA('${o.id}')">💬</button>
+    </div></td></tr>`;
+  return `<tr>
+    <td><b style="color:var(--red)">${o.id}</b></td>
+    <td style="font-size:.72rem">${o.date}</td>
+    <td><b>${o.client}</b></td>
+    <td style="font-size:.75rem">${o.tel}</td>
+    <td style="font-size:.8rem">${o.emoji} ${o.produit}</td>
+    <td>${o.ville}</td>
+    <td style="font-family:Bebas Neue,sans-serif;font-size:.95rem;color:var(--red)">${o.prix.toLocaleString("fr")}</td>
+    <td style="font-size:.72rem">${o.paiement}</td>
+    <td style="font-size:.75rem">${o.agentName||"<i style='color:var(--muted)'>—</i>"}</td>
+    <td><span class="badge ${s.cls}">${s.label}</span></td>
+    <td style="font-size:.72rem;max-width:80px;overflow:hidden;text-overflow:ellipsis">${o.note||"—"}</td>
+    <td><div style="display:flex;gap:.25rem">
+      ${o.statut==="Nouvelle"?`<button class="btn btn-gold btn-sm" onclick="openAffect('${o.id}')">🎯</button>`:""}
+      <button class="btn btn-outline btn-sm" onclick="openStatus('${o.id}')">✏️</button>
+      <button class="btn btn-green btn-sm" onclick="sendWA('${o.id}')">💬</button>
+    </div></td></tr>`;
+}
+
+function renderAllOrdersCEO(list){
+  document.getElementById("allOrdersTbl").innerHTML=list.map(o=>orderRow(o,"full")).join("");
+}
+function filterOrders(q){renderAllOrdersCEO(q?orders.filter(o=>o.client.toLowerCase().includes(q.toLowerCase())||o.id.includes(q)):orders);}
+function filterOrdersStatus(s){renderAllOrdersCEO(s==="all"?orders:orders.filter(o=>o.statut===s));}
+function filterOrdersAgent(a){renderAllOrdersCEO(a==="all"?orders:orders.filter(o=>o.agent===a));}
+function populateAgentFilter(){
+  const s=document.getElementById("agentFil");if(!s)return;
+  s.innerHTML="<option value='all'>Tous agents</option>";
+  AGENTS_LIST().forEach(a=>{const o=document.createElement("option");o.value=a.id;o.textContent=a.name;s.appendChild(o);});
+}
+
+// ════════════════════════════════════
+// AGENTS GESTION (CEO)
+// ════════════════════════════════════
+function renderAgentsGrid(){
+  document.getElementById("agentsGrid").innerHTML=AGENTS_LIST().map(a=>{
+    const mes=orders.filter(o=>o.agent===a.id);
+    const liv=mes.filter(o=>o.statut==="Livrée").length;
+    const enc=mes.filter(o=>["Affectée","Confirmée","En livraison"].includes(o.statut)).length;
+    const tx=mes.length?Math.round(liv/mes.length*100):0;
+    const init=a.name.split(" ").map(n=>n[0]).join("").slice(0,2);
+    const roleLabel={agent:"🧑 Agent",super:"📊 Superviseur"}[a.role]||a.role;
+    return `<div class="agent-card">
+      <button class="del-btn" onclick="deleteAgent('${a.id}')">✕</button>
+      <div class="agent-av" style="background:linear-gradient(135deg,${a.color},${a.color}88)">${init}</div>
+      <div class="agent-name">${a.name}</div>
+      <span class="agent-role-tag" style="background:${a.color}18;color:${a.color}">${roleLabel}</span>
+      <div style="font-size:.72rem;color:var(--muted);margin-bottom:.5rem">🔑 ${a.id} &nbsp;|&nbsp; 📍 ${a.zone||"—"}</div>
+      <div class="agent-stats">
+        <div class="ags"><div class="ags-n" style="color:var(--blue)">${mes.length}</div><div class="ags-l">Total</div></div>
+        <div class="ags"><div class="ags-n" style="color:var(--gold)">${enc}</div><div class="ags-l">En cours</div></div>
+        <div class="ags"><div class="ags-n" style="color:var(--green)">${liv}</div><div class="ags-l">Livrées</div></div>
+      </div>
+      <div class="perf-bar-wrap"><div class="perf-bar" style="width:${tx}%"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:.68rem;color:var(--muted);margin-bottom:.8rem"><span>Performance</span><span style="color:var(--green);font-weight:800">${tx}%</span></div>
+      <div class="agent-card-acts">
+        <button class="btn btn-outline btn-sm" onclick="editAgent('${a.id}')">✏️ Modifier</button>
+        <button class="btn btn-green btn-sm" onclick="toast('💬 Message envoyé à ${a.name}','ok')">💬 WA</button>
+        <button class="btn btn-gold btn-sm" onclick="resetPass('${a.id}')">🔑 Reset MDP</button>
+      </div>
+    </div>`;
+  }).join("")+`<div style="border:2px dashed var(--border);border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:200px;cursor:pointer;transition:all .3s" onclick="openAddAgent()" onmouseover="this.style.borderColor='var(--red)'" onmouseout="this.style.borderColor='var(--border)'">
+    <div style="font-size:2rem;margin-bottom:.5rem">➕</div>
+    <div style="font-weight:800;color:var(--muted);font-size:.85rem">Ajouter un agent</div>
+  </div>`;
+}
+
+function openAddAgent(){
+  editAgentId=null;
+  document.getElementById("addAgentTitle").textContent="➕ Ajouter un agent";
+  ["agNom","agId","agPass","agTel","agZone"].forEach(id=>document.getElementById(id).value="");
+  document.getElementById("agRole").value="agent";
+  document.getElementById("agColor").value="#E8001C";
+  document.getElementById("addAgentOverlay").classList.add("show");
+}
+
+function editAgent(id){
+  const a=USERS.find(u=>u.id===id);if(!a)return;
+  editAgentId=id;
+  document.getElementById("addAgentTitle").textContent="✏️ Modifier agent";
+  document.getElementById("agNom").value=a.name;
+  document.getElementById("agId").value=a.id;
+  document.getElementById("agPass").value=a.pass;
+  document.getElementById("agRole").value=a.role;
+  document.getElementById("agTel").value=a.tel||"";
+  document.getElementById("agZone").value=a.zone||"";
+  document.getElementById("agColor").value=a.color||"#E8001C";
+  document.getElementById("addAgentOverlay").classList.add("show");
+}
+
+function saveAgent(){
+  const nom=document.getElementById("agNom").value.trim();
+  const id=document.getElementById("agId").value.trim();
+  const pass=document.getElementById("agPass").value.trim();
+  const role=document.getElementById("agRole").value;
+  const tel=document.getElementById("agTel").value.trim();
+  const zone=document.getElementById("agZone").value.trim();
+  const color=document.getElementById("agColor").value;
+  if(!nom||!id||!pass){toast("⚠️ Remplissez tous les champs obligatoires","warn");return;}
+  if(editAgentId){
+    const idx=USERS.findIndex(u=>u.id===editAgentId);
+    if(idx>=0) USERS[idx]={...USERS[idx],name:nom,id,pass,role,tel,zone,color};
+    toast(`✅ Agent ${nom} modifié !`,"ok");
+  } else {
+    if(USERS.find(u=>u.id===id)){toast("❌ Cet identifiant existe déjà","err");return;}
+    USERS.push({id,pass,name:nom,role,color,tel,zone});
+    toast(`✅ Agent ${nom} ajouté avec succès !`,"ok");
+  }
+  closeOverlays();
+  renderAgentsGrid();
+  populateAgentFilter();
+}
+
+function deleteAgent(id){
+  if(!confirm("Supprimer cet agent ? Ses commandes resteront dans le système."))return;
+  USERS=USERS.filter(u=>u.id!==id);
+  renderAgentsGrid();
+  toast("🗑️ Agent supprimé","warn");
+}
+
+function resetPass(id){
+  const newPass="hp"+Math.floor(Math.random()*9000+1000);
+  const u=USERS.find(x=>x.id===id);
+  if(u){u.pass=newPass;toast(`🔑 Nouveau MDP pour ${u.name} : ${newPass}`,"ok");}
+}
+
+// ════════════════════════════════════
+// PRODUITS ADMIN (CEO)
+// ════════════════════════════════════
+function renderProduitsAdmin(){
+  document.getElementById("prodAdminGrid").innerHTML=PRODUITS.map(p=>{
+    const sc=p.stock===0?"❌ Rupture":p.stock<=4?"⚠️ Faible":"✅ Stock OK";
+    const scC=p.stock===0?"var(--red)":p.stock<=4?"var(--orange)":"var(--green)";
+    return `<div class="prod-admin-card">
+      <div class="pac-img">
+        ${p.emoji}
+        <span class="pac-stock" style="background:${scC}18;color:${scC}">${sc}</span>
+      </div>
+      <div class="pac-body">
+        <div class="pac-cat">${{beaute:"💄 Beauté",maison:"🏠 Maison",tech:"📱 Tech",sante:"💪 Santé",mode:"👗 Mode",enfant:"🧒 Enfants"}[p.cat]||p.cat}</div>
+        <div class="pac-name">${p.nom}</div>
+        <div class="pac-prix">${p.prix.toLocaleString("fr")} GNF <span style="font-size:.7rem;color:var(--muted);text-decoration:line-through;font-family:Nunito">${p.old.toLocaleString("fr")}</span></div>
+        <div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.7rem">
+          <button style="width:24px;height:24px;border-radius:5px;border:1.5px solid var(--border);background:#fff;cursor:pointer;font-weight:800" onclick="updateStock(${p.id},-1)">−</button>
+          <span style="font-family:Bebas Neue,sans-serif;font-size:1.1rem;color:${scC};min-width:20px;text-align:center">${p.stock}</span>
+          <button style="width:24px;height:24px;border-radius:5px;border:1.5px solid var(--border);background:#fff;cursor:pointer;font-weight:800" onclick="updateStock(${p.id},1)">+</button>
+          <span style="font-size:.65rem;color:var(--muted)">unités</span>
+        </div>
+        <div class="pac-acts">
+          <button class="btn btn-outline btn-sm" style="flex:1" onclick="editProd(${p.id})">✏️ Modifier</button>
+          <button class="btn btn-red btn-sm" onclick="deleteProd(${p.id})">🗑️</button>
+        </div>
+      </div>
+    </div>`;
+  }).join("")+`<div style="border:2px dashed var(--border);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:250px;cursor:pointer;transition:all .3s" onclick="openAddProd()" onmouseover="this.style.borderColor='var(--red)'" onmouseout="this.style.borderColor='var(--border)'">
+    <div style="font-size:2.5rem;margin-bottom:.5rem">➕</div>
+    <div style="font-weight:800;color:var(--muted)">Ajouter un produit</div>
+  </div>`;
+}
+
+function updateStock(id,delta){
+  const p=PRODUITS.find(x=>x.id===id);
+  if(p){p.stock=Math.max(0,p.stock+delta);renderProduitsAdmin();
+    if(p.stock===0)toast(`⚠️ ${p.nom} : RUPTURE DE STOCK !`,"warn");
+    else if(p.stock<=3)toast(`⚠️ ${p.nom} : Stock faible (${p.stock} restants)`,"warn");
+  }
+}
+
+function openAddProd(){
+  editProdId=null;
+  document.getElementById("addProdTitle").textContent="➕ Ajouter un produit";
+  ["prNom","prDesc","prPhoto","prEmoji"].forEach(id=>document.getElementById(id).value="");
+  document.getElementById("prPrix").value="";document.getElementById("prOld").value="";
+  document.getElementById("prStock").value="";document.getElementById("prBadge").value="";
+  document.getElementById("addProdOverlay").classList.add("show");
+}
+
+function editProd(id){
+  const p=PRODUITS.find(x=>x.id===id);if(!p)return;
+  editProdId=id;
+  document.getElementById("addProdTitle").textContent="✏️ Modifier produit";
+  document.getElementById("prNom").value=p.nom;
+  document.getElementById("prCat").value=p.cat;
+  document.getElementById("prPrix").value=p.prix;
+  document.getElementById("prOld").value=p.old;
+  document.getElementById("prStock").value=p.stock;
+  document.getElementById("prEmoji").value=p.emoji;
+  document.getElementById("prDesc").value=p.desc;
+  document.getElementById("prBadge").value=p.badge||"";
+  document.getElementById("addProdOverlay").classList.add("show");
+}
+
+function saveProd(){
+  const nom=document.getElementById("prNom").value.trim();
+  const cat=document.getElementById("prCat").value;
+  const prix=parseInt(document.getElementById("prPrix").value)||0;
+  const old=parseInt(document.getElementById("prOld").value)||0;
+  const stock=parseInt(document.getElementById("prStock").value)||0;
+  const emoji=document.getElementById("prEmoji").value.trim()||"📦";
+  const desc=document.getElementById("prDesc").value.trim();
+  const badge=document.getElementById("prBadge").value;
+  if(!nom||!prix){toast("⚠️ Nom et prix obligatoires","warn");return;}
+  if(editProdId){
+    const idx=PRODUITS.findIndex(p=>p.id===editProdId);
+    if(idx>=0)PRODUITS[idx]={...PRODUITS[idx],nom,cat,prix,old,stock,emoji,desc,badge};
+    toast(`✅ Produit "${nom}" modifié !`,"ok");
+  } else {
+    PRODUITS.push({id:Date.now(),nom,cat,prix,old,stock,emoji,desc,badge});
+    toast(`✅ Produit "${nom}" ajouté !`,"ok");
+  }
+  closeOverlays();renderProduitsAdmin();
+}
+
+function deleteProd(id){
+  if(!confirm("Supprimer ce produit du catalogue ?"))return;
+  PRODUITS=PRODUITS.filter(p=>p.id!==id);
+  renderProduitsAdmin();toast("🗑️ Produit supprimé","warn");
+}
+
+// SITE EDITOR
+function updateSitePreview(){
+  const t=document.getElementById("siteTitle")||{value:""};
+  const s=document.getElementById("siteSub")||{value:""};
+  const prev=document.getElementById("prevHero");
+  if(prev)prev.innerHTML=`<b style="font-size:1rem">${t.value}</b><br><span style="font-size:.8rem">${s.value}</span>`;
+}
+document.addEventListener("input",e=>{if(e.target.id==="siteTitle"||e.target.id==="siteSub")updateSitePreview();});
+
+// ════════════════════════════════════
+// SUPERVISEUR
+// ════════════════════════════════════
+function setupSup(){
+  document.getElementById("sbNav").innerHTML=`
+    <div class="sb-sec">Supervision</div>
+    <div class="sb-link on" onclick="showPg('sup-dash',this)"><span class="sb-ico">📊</span>Tableau de bord<span class="sb-badge">${orders.filter(o=>o.statut==="Nouvelle").length}</span></div>
+    <div class="sb-link" onclick="showPg('sup-all',this)"><span class="sb-ico">📦</span>Toutes commandes</div>`;
+  renderSupDash();
+  renderSupAll(orders);
+}
+
+function renderSupDash(){
+  const total=orders.length,nouvelles=orders.filter(o=>o.statut==="Nouvelle").length;
+  const livrees=orders.filter(o=>o.statut==="Livrée").length;
+  const ca=orders.filter(o=>o.statut==="Livrée").reduce((s,o)=>s+o.prix,0);
+  document.getElementById("supStats").innerHTML=`
+    <div class="sc sc-red"><div class="sc-ico">🆕</div><div class="sc-val">${nouvelles}</div><div class="sc-lbl">À affecter</div><div class="sc-trend dn">⚠️ Urgent</div></div>
+    <div class="sc sc-blue"><div class="sc-ico">📦</div><div class="sc-val">${total}</div><div class="sc-lbl">Total</div></div>
+    <div class="sc sc-green"><div class="sc-ico">📬</div><div class="sc-val">${livrees}</div><div class="sc-lbl">Livrées</div></div>
+    <div class="sc sc-gold"><div class="sc-ico">⚠️</div><div class="sc-val">${orders.filter(o=>["Injoignable","Reportée"].includes(o.statut)).length}</div><div class="sc-lbl">Problèmes</div></div>
+    <div class="sc sc-purple"><div class="sc-ico">💰</div><div class="sc-val">${(ca/1000000).toFixed(1)}M</div><div class="sc-lbl">CA GNF</div></div>`;
+
+  document.getElementById("supNewCount").textContent=`${nouvelles} commande(s) en attente`;
+  document.getElementById("supNewTbl").innerHTML=orders.filter(o=>o.statut==="Nouvelle").map(o=>{
+    const s=ST_MAP[o.statut]||{cls:"b-new",label:o.statut};
+    return `<tr>
+      <td><b style="color:var(--red)">${o.id}</b></td>
+      <td style="font-size:.72rem">${o.date.split(" ")[1]}</td>
+      <td><b>${o.client}</b></td>
+      <td style="font-size:.75rem">${o.tel}</td>
+      <td>${o.emoji} ${o.produit}</td>
+      <td>${o.ville}</td>
+      <td style="font-family:Bebas Neue,sans-serif;color:var(--red)">${o.prix.toLocaleString("fr")} GNF</td>
+      <td style="font-size:.72rem">${o.paiement}</td>
+      <td><span class="badge ${s.cls}">${s.label}</span></td>
+      <td style="font-size:.75rem">${o.agentName||"<i style='color:var(--muted)'>Non affecté</i>"}</td>
+      <td><div style="display:flex;gap:.3rem">
+        <button class="btn btn-gold btn-sm" onclick="openAffect('${o.id}')">🎯 Affecter</button>
+        <button class="btn btn-green btn-sm" onclick="sendWA('${o.id}')">💬</button>
+      </div></td></tr>`;
+  }).join("")||`<tr><td colspan="11"><div class="empty"><div class="empty-ico">✅</div><p>Toutes les commandes sont affectées !</p></div></td></tr>`;
+
+  // Perf agents
+  document.getElementById("supPerfGrid").innerHTML=AGENTS_LIST().map(a=>{
+    const mes=orders.filter(o=>o.agent===a.id);
+    const liv=mes.filter(o=>o.statut==="Livrée").length;
+    const enc=mes.filter(o=>["Affectée","Confirmée","En livraison"].includes(o.statut)).length;
+    const tx=mes.length?Math.round(liv/mes.length*100):0;
+    const init=a.name.split(" ").map(n=>n[0]).join("").slice(0,2);
+    return `<div style="background:var(--bg);border-radius:10px;padding:1rem;border:1.5px solid var(--border);">
+      <div style="display:flex;align-items:center;gap:.7rem;margin-bottom:.7rem">
+        <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,${a.color},${a.color}88);display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:.78rem;flex-shrink:0">${init}</div>
+        <div><div style="font-weight:800;font-size:.82rem">${a.name}</div><div style="font-size:.65rem;color:var(--muted)">${enc} en cours · ${liv} livrées</div></div>
+      </div>
+      <div class="perf-bar-wrap"><div class="perf-bar" style="width:${tx}%"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:.68rem;margin-top:.2rem"><span style="color:var(--muted)">${mes.length} total</span><span style="color:var(--green);font-weight:800">${tx}%</span></div>
+    </div>`;
+  }).join("");
+}
+
+function renderSupAll(list){
+  document.getElementById("supAllTbl").innerHTML=list.map(o=>{
+    const s=ST_MAP[o.statut]||{cls:"b-new",label:o.statut};
+    return `<tr>
+      <td><b style="color:var(--red)">${o.id}</b></td>
+      <td><b>${o.client}</b></td>
+      <td style="font-size:.8rem">${o.emoji} ${o.produit}</td>
+      <td>${o.ville}</td>
+      <td style="font-family:Bebas Neue,sans-serif;color:var(--red)">${o.prix.toLocaleString("fr")} GNF</td>
+      <td style="font-size:.75rem">${o.agentName||"<i style='color:var(--muted)'>—</i>"}</td>
+      <td><span class="badge ${s.cls}">${s.label}</span></td>
+      <td style="font-size:.72rem">${o.note||"—"}</td>
+      <td><div style="display:flex;gap:.25rem">
+        ${o.statut==="Nouvelle"?`<button class="btn btn-gold btn-sm" onclick="openAffect('${o.id}')">🎯</button>`:""}
+        <button class="btn btn-outline btn-sm" onclick="openStatus('${o.id}')">✏️</button>
+        <button class="btn btn-green btn-sm" onclick="sendWA('${o.id}')">💬</button>
+      </div></td></tr>`;
+  }).join("");
+}
+function filterSupAll(q){renderSupAll(q?orders.filter(o=>o.client.toLowerCase().includes(q.toLowerCase())||o.id.includes(q)):orders);}
+function filterSupStatus(s){renderSupAll(s==="all"?orders:orders.filter(o=>o.statut===s));}
+
+function autoAffect(){
+  const news=orders.filter(o=>o.statut==="Nouvelle");
+  if(!news.length){toast("✅ Aucune commande à affecter","ok");return;}
+  const agents=AGENTS_LIST();
+  news.forEach((o,i)=>{
+    const a=agents[i%agents.length];
+    o.statut="Affectée";o.agent=a.id;o.agentName=a.name;
+  });
+  if(currentUser.role==="ceo"){renderCEODash();renderAllOrdersCEO(orders);}
+  else{renderSupDash();renderSupAll(orders);}
+  toast(`⚡ ${news.length} commandes affectées automatiquement !`,"ok");
+}
+
+// ════════════════════════════════════
+// AGENT
+// ════════════════════════════════════
+function setupAgent(){
+  document.getElementById("sbNav").innerHTML=`
+    <div class="sb-sec">Mes commandes</div>
+    <div class="sb-link on" onclick="showPg('agent',this)"><span class="sb-ico">📦</span>Mes commandes<span class="sb-badge" id="myBadge">0</span></div>`;
+  renderAgentKanban();
+}
+
+function renderAgentKanban(){
+  const my=orders.filter(o=>o.agent===currentUser.id);
+  const badge=document.getElementById("myBadge");
+  if(badge)badge.textContent=my.filter(o=>o.statut==="Affectée").length;
+  document.getElementById("agentInfo").textContent=`${my.length} commandes au total · ${my.filter(o=>o.statut==="Affectée").length} nouvelles à traiter`;
+
+  const cols=[
+    {key:"Affectée",label:"🎯 À traiter",color:"#3B82F6"},
+    {key:"Confirmée",label:"✅ Confirmées",color:"#F5A800"},
+    {key:"En livraison",label:"🚚 En livraison",color:"#1A8A2E"},
+    {key:"Reportée",label:"⏳ Reportées",color:"#F97316"},
+    {key:"Injoignable",label:"📵 Injoignable",color:"#6b7280"},
+  ];
+
+  document.getElementById("agentKanban").innerHTML=cols.map(col=>{
+    const colOrders=my.filter(o=>o.statut===col.key);
+    return `<div class="k-col">
+      <div class="k-col-h">
+        ${col.label}
+        <span class="k-cnt" style="background:${col.color}18;color:${col.color}">${colOrders.length}</span>
+      </div>
+      ${colOrders.length?colOrders.map(o=>`
+        <div class="k-card" style="border-left-color:${col.color}" onclick="openStatus('${o.id}')">
+          <div class="k-id">${o.id} · ${o.date.split(" ")[1]}</div>
+          <div class="k-client">👤 ${o.client}</div>
+          <div style="font-size:.72rem;color:var(--muted)">📞 ${o.tel}</div>
+          <div class="k-prod">${o.emoji} ${o.produit}</div>
+          <div style="font-size:.72rem;color:var(--muted)">📍 ${o.ville} — ${o.adresse}</div>
+          <div style="font-size:.72rem;color:var(--muted)">💳 ${o.paiement}</div>
+          <div class="k-prix">${o.prix.toLocaleString("fr")} GNF</div>
+          ${o.note?`<div style="font-size:.7rem;color:var(--orange);margin-top:.3rem">📝 ${o.note}</div>`:""}
+          <div style="display:flex;gap:.4rem;margin-top:.6rem">
+            <button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openStatus('${o.id}')">✏️ Statut</button>
+            <button class="btn btn-green btn-sm" onclick="event.stopPropagation();sendWA('${o.id}')">💬 Client</button>
+          </div>
+        </div>`).join(""):`<div class="empty"><div class="empty-ico" style="font-size:1.8rem">📭</div><p style="font-size:.75rem">Aucune</p></div>`}
+    </div>`;
+  }).join("");
+}
+
+// ════════════════════════════════════
+// AFFECTATION MODAL
+// ════════════════════════════════════
+function openAffect(id){
+  const o=orders.find(x=>x.id===id);if(!o)return;
+  targetOId=id;pickedAg=null;
+  document.getElementById("affId").textContent=id;
+  document.getElementById("affDetail").innerHTML=`
+    <div><div style="font-size:.65rem;font-weight:800;text-transform:uppercase;color:var(--muted);margin-bottom:.2rem">Client</div><div style="font-weight:800">${o.client}</div></div>
+    <div><div style="font-size:.65rem;font-weight:800;text-transform:uppercase;color:var(--muted);margin-bottom:.2rem">Téléphone</div><div style="font-weight:800">${o.tel}</div></div>
+    <div><div style="font-size:.65rem;font-weight:800;text-transform:uppercase;color:var(--muted);margin-bottom:.2rem">Produit</div><div style="font-weight:800">${o.emoji} ${o.produit}</div></div>
+    <div><div style="font-size:.65rem;font-weight:800;text-transform:uppercase;color:var(--muted);margin-bottom:.2rem">Montant</div><div style="font-weight:800;color:var(--red)">${o.prix.toLocaleString("fr")} GNF</div></div>
+    <div><div style="font-size:.65rem;font-weight:800;text-transform:uppercase;color:var(--muted);margin-bottom:.2rem">Ville</div><div style="font-weight:800">${o.ville}</div></div>
+    <div><div style="font-size:.65rem;font-weight:800;text-transform:uppercase;color:var(--muted);margin-bottom:.2rem">Paiement</div><div style="font-weight:800">${o.paiement}</div></div>`;
+
+  document.getElementById("agentChoiceGrid").innerHTML=AGENTS_LIST().map(a=>{
+    const enc=orders.filter(x=>x.agent===a.id&&["Affectée","Confirmée"].includes(x.statut)).length;
+    const init=a.name.split(" ").map(n=>n[0]).join("").slice(0,2);
+    return `<div id="ach-${a.id}" style="border:2px solid var(--border);border-radius:10px;padding:.9rem;cursor:pointer;transition:all .3s;display:flex;align-items:center;gap:.7rem" onclick="pickAgent('${a.id}')">
+      <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,${a.color},${a.color}88);display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:.78rem;flex-shrink:0">${init}</div>
+      <div>
+        <div style="font-weight:800;font-size:.82rem">${a.name}</div>
+        <div style="font-size:.68rem;color:var(--muted)">${a.id}</div>
+        <div style="font-size:.68rem;font-weight:800;color:${enc>5?"var(--red)":enc>3?"var(--orange)":"var(--green)"}">${enc} commandes en cours</div>
+      </div>
+    </div>`;
+  }).join("");
+  document.getElementById("affectOverlay").classList.add("show");
+}
+
+function pickAgent(id){
+  pickedAg=id;
+  document.querySelectorAll("[id^='ach-']").forEach(el=>{el.style.borderColor="var(--border)";el.style.background="#fff";});
+  const el=document.getElementById("ach-"+id);
+  if(el){el.style.borderColor="var(--gold)";el.style.background="rgba(245,168,0,.06)";}
+}
+
+function confirmAffect(){
+  if(!pickedAg){toast("⚠️ Choisissez un agent","warn");return;}
+  const o=orders.find(x=>x.id===targetOId);
+  const a=USERS.find(u=>u.id===pickedAg);
+  o.statut="Affectée";o.agent=pickedAg;o.agentName=a.name;
+  closeOverlays();
+  if(currentUser.role==="ceo"){renderCEODash();renderAllOrdersCEO(orders);}
+  else{renderSupDash();renderSupAll(orders);}
+  toast(`✅ ${targetOId} affectée à ${a.name}`,"ok");
+  setTimeout(()=>toast(`💬 Notification envoyée à ${a.name}`,"ok"),1500);
+}
+
+// ════════════════════════════════════
+// STATUT MODAL
+// ════════════════════════════════════
+function openStatus(id){
+  const o=orders.find(x=>x.id===id);if(!o)return;
+  targetOId=id;pickedSt=null;
+  document.getElementById("stId").textContent=id;
+  document.getElementById("stDetail").innerHTML=`
+    <div><div style="font-size:.65rem;font-weight:800;text-transform:uppercase;color:var(--muted);margin-bottom:.2rem">Client</div><div style="font-weight:800">${o.client}</div></div>
+    <div><div style="font-size:.65rem;font-weight:800;text-transform:uppercase;color:var(--muted);margin-bottom:.2rem">Produit</div><div style="font-weight:800">${o.emoji} ${o.produit}</div></div>`;
+  document.getElementById("stNote").value=o.note||"";
+  const sts=["Confirmée","En livraison","Livrée","Reportée","Injoignable","Annulée"];
+  const sc={Confirmée:"so-confirm","En livraison":"so-livraison",Livrée:"so-livre",Reportée:"so-reporte",Injoignable:"so-injoignable",Annulée:"so-annule"};
+  const si={Confirmée:"✅",Livrée:"📬","En livraison":"🚚",Reportée:"⏳",Injoignable:"📵",Annulée:"❌"};
+  document.getElementById("statusOpts").innerHTML=sts.map(s=>`<div class="so ${sc[s]}" onclick="pickStatus(this,'${s}')">${si[s]} ${s}</div>`).join("");
+  document.getElementById("statusOverlay").classList.add("show");
+}
+
+function pickStatus(el,s){
+  pickedSt=s;
+  document.querySelectorAll(".so").forEach(e=>e.classList.remove("picked"));
+  el.classList.add("picked");
+}
+
+function confirmStatus(){
+  if(!pickedSt){toast("⚠️ Choisissez un statut","warn");return;}
+  const o=orders.find(x=>x.id===targetOId);
+  o.statut=pickedSt;o.note=document.getElementById("stNote").value;
+  closeOverlays();
+  if(currentUser.role==="ceo"){renderCEODash();renderAllOrdersCEO(orders);}
+  else if(currentUser.role==="super"){renderSupDash();renderSupAll(orders);}
+  else renderAgentKanban();
+  toast(`✅ ${targetOId} → ${pickedSt}`,"ok");
+}
+
+// ════════════════════════════════════
+// WHATSAPP
+// ════════════════════════════════════
+const WA_NUM="224XXXXXXXX";
+function sendWA(id){
+  const o=orders.find(x=>x.id===id);if(!o)return;
+  const msg=`🛍 *Commande HPSHOP ${o.id}*
+
+👤 ${o.client}
+📞 ${o.tel}
+📦 ${o.emoji} ${o.produit}
+💰 ${o.prix.toLocaleString("fr")} GNF
+📍 ${o.adresse}, ${o.ville}
+💳 ${o.paiement}
+📊 Statut : ${o.statut}
+${o.note?"📝 "+o.note:""}
+
+⚡ Via *Rapido*`;
+  window.open(`https://wa.me/${WA_NUM}?text=${encodeURIComponent(msg)}`,"_blank");
+  toast("💬 Message WhatsApp ouvert !","ok");
+}
+function sendManagerWA(){
+  window.open(`https://wa.me/${WA_NUM}?text=${encodeURIComponent("👋 Bonjour, je suis "+currentUser.name+" — j'ai besoin d'aide concernant mes commandes.")}`,"_blank");
+}
+function exportWA(){
+  const liv=orders.filter(o=>o.statut==="Livrée").length;
+  const ca=orders.filter(o=>o.statut==="Livrée").reduce((s,o)=>s+o.prix,0);
+  const msg=`📊 *Rapport HPSHOP*
+
+📦 Total : ${orders.length}
+✅ Livrées : ${liv}
+⚠️ Problèmes : ${orders.filter(o=>["Injoignable","Annulée"].includes(o.statut)).length}
+💰 CA : ${(ca/1000000).toFixed(1)}M GNF`;
+  window.open(`https://wa.me/${WA_NUM}?text=${encodeURIComponent(msg)}`,"_blank");
+}
+function exportCSV(){
+  const h="ID,Date,Client,Tel,Produit,Prix,Ville,Paiement,Agent,Statut,Note
+";
+  const r=orders.map(o=>`${o.id},${o.date},${o.client},${o.tel},"${o.produit}",${o.prix},${o.ville},${o.paiement},"${o.agentName||""}",${o.statut},"${o.note||""}"`).join("
+");
+  const b=new Blob([h+r],{type:"text/csv"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="hpshop-commandes.csv";a.click();
+  toast("📥 Export CSV téléchargé !","ok");
+}
+
+// ════════════════════════════════════
+// NAVIGATION
+// ════════════════════════════════════
+function showPg(name,btn){
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("on"));
+  document.querySelectorAll(".sb-link").forEach(l=>l.classList.remove("on"));
+  const pg=document.getElementById("pg-"+name);
+  if(pg)pg.classList.add("on");
+  if(btn)btn.classList.add("on");
+  const titles={"ceo-dash":"Tableau de bord","ceo-orders":"Toutes les commandes","ceo-agents":"Gestion des agents","ceo-produits":"Catalogue produits","ceo-site":"Éditeur du site","sup-dash":"Tableau de bord Superviseur","sup-all":"Toutes les commandes","agent":"Mes commandes affectées"};
+  document.getElementById("tbTitle").textContent=titles[name]||name;
+}
+
+function closeOverlays(){
+  document.querySelectorAll(".overlay").forEach(o=>o.classList.remove("show"));
+  pickedAg=null;pickedSt=null;targetOId=null;editAgentId=null;editProdId=null;
+}
+document.querySelectorAll(".overlay").forEach(o=>o.addEventListener("click",function(e){if(e.target===this)closeOverlays();}));
+
+// ════════════════════════════════════
+// TOAST
+// ════════════════════════════════════
+let toastTimer;
+function toast(msg,type="ok"){
+  const el=document.getElementById("toastEl");
+  el.textContent=msg;el.className=`toast t-${type} show`;
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>el.classList.remove("show"),3500);
+}
+
+// Simuler nouvelles commandes
+setInterval(()=>{
+  const p=PRODUITS[Math.floor(Math.random()*PRODUITS.length)];
+  const n=NOMS[Math.floor(Math.random()*NOMS.length)];
+  const v=VILLES[Math.floor(Math.random()*VILLES.length)];
+  const newO={
+    id:"HP"+String(orders.length+1).padStart(4,"0"),
+    date:new Date().toLocaleString("fr-FR"),
+    client:n,tel:"62"+String(Math.floor(Math.random()*9000000)+1000000),
+    produit:p.nom,emoji:p.emoji,prix:p.prix,
+    ville:v,adresse:"Quartier "+QUARTIERS[Math.floor(Math.random()*QUARTIERS.length)],
+    paiement:PAYS[Math.floor(Math.random()*PAYS.length)],
+    statut:"Nouvelle",agent:null,agentName:null,note:""
+  };
+  orders.unshift(newO);
+  if(currentUser){
+    if(currentUser.role==="ceo")renderCEODash();
+    else if(currentUser.role==="super")renderSupDash();
+    toast(`🔔 Nouvelle commande : ${n} → ${p.nom}`,"ok");
+  }
+},35000);
+</script>
+</body>
+</html>
