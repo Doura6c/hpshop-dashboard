@@ -223,7 +223,7 @@ tr:hover td { background:#FAFBFF; }
       <label>Mot de passe</label>
       <input type="password" id="lp" placeholder="Votre mot de passe">
     </div>
-    <button class="login-btn" id="loginBtn">ACCEDER</button>
+    <button class="login-btn" onclick="doLogin()">ACCEDER</button>
     <div class="hint">
       CEO : ceo / hpshop2026<br>
       Superviseur : super / hpshop2026<br>
@@ -479,28 +479,32 @@ var pickedSt = null;
 var editAgId = null;
 
 // LOGIN
-document.getElementById("loginBtn").onclick = function() { doLogin(); };
+// login btn inline
 document.getElementById("lp").onkeydown = function(e) { if (e.key === "Enter") doLogin(); };
 document.getElementById("lu").onkeydown = function(e) { if (e.key === "Enter") doLogin(); };
 
 function doLogin() {
-  var u = document.getElementById("lu").value.trim();
-  var p = document.getElementById("lp").value.trim();
-  var user = null;
-  for (var i = 0; i < USERS.length; i++) {
-    if (USERS[i].id === u && USERS[i].pass === p) {
-      user = USERS[i];
-      break;
+  try {
+    var u = document.getElementById("lu").value.trim();
+    var p = document.getElementById("lp").value.trim();
+    var user = null;
+    for (var i = 0; i < USERS.length; i++) {
+      if (USERS[i].id === u && USERS[i].pass === p) {
+        user = USERS[i];
+        break;
+      }
     }
+    if (!user) {
+      alert("Identifiant ou mot de passe incorrect\n\nEssayez: ceo / hpshop2026");
+      return;
+    }
+    currentUser = user;
+    document.getElementById("loginScreen").style.display = "none";
+    document.getElementById("app").style.display = "grid";
+    initApp();
+  } catch(e) {
+    alert("Erreur: " + e.message);
   }
-  if (!user) {
-    toast("Identifiant ou mot de passe incorrect", "err");
-    return;
-  }
-  currentUser = user;
-  document.getElementById("loginScreen").style.display = "none";
-  document.getElementById("app").style.display = "grid";
-  initApp();
 }
 
 document.getElementById("logoutBtn").onclick = function() {
