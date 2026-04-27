@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HPSHOP — Administration</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: Arial, sans-serif; background:#F4F6FA; color:#1a1a1a; }
+
+/* LOGIN */
+.login-screen {
+  position:fixed; inset:0;
+  background:linear-gradient(135deg,#0a0800,#1a0500);
+  display:flex; align-items:center; justify-content:center; z-index:9999;
+}
+.login-box {
+  background:#fff; border-radius:16px; padding:2.5rem;
+  width:380px; box-shadow:0 30px 80px rgba(0,0,0,0.4); text-align:center;
+}
+.login-title { font-size:2rem; font-weight:900; color:#E8001C; letter-spacing:2px; margin-bottom:.3rem; }
+.login-sub { font-size:.8rem; color:#666; margin-bottom:2rem; }
+.fg { margin-bottom:1rem; text-align:left; }
+.fg label { display:block; font-size:.72rem; font-weight:800; text-transform:uppercase; color:#666; margin-bottom:.4rem; }
+.fg input {
+  width:100%; padding:12px 14px; border:1.5px solid #E5E7EB;
+  border-radius:8px; font-family:Arial,sans-serif; font-size:.95rem; outline:none;
+}
+.fg input:focus { border-color:#E8001C; }
+.login-btn {
+  width:100%; background:#E8001C; color:#fff; border:none;
+  padding:14px; border-radius:8px; font-size:1.1rem; font-weight:800;
+  cursor:pointer; margin-top:.5rem; letter-spacing:1px;
+}
+.login-btn:hover { background:#b8001a; }
+.hint { font-size:.68rem; color:#bbb; margin-top:1rem; line-height:1.8; }
+
+/* LAYOUT */
+.layout { display:grid; grid-template-columns:240px 1fr; min-height:100vh; }
+.sidebar {
+  background:#111; display:flex; flex-direction:column;
+  position:sticky; top:0; height:100vh; overflow-y:auto;
+}
+.sb-logo { padding:1.5rem; border-bottom:1px solid rgba(255,255,255,.07); }
+.sb-logo-main { font-size:1.8rem; font-weight:900; color:#F5A800; letter-spacing:3px; }
+.sb-logo-sub { font-size:.6rem; color:rgba(255,255,255,.3); text-transform:uppercase; letter-spacing:2px; }
+.sb-user { padding:1rem 1.5rem; border-bottom:1px solid rgba(255,255,255,.07); display:flex; align-items:center; gap:.8rem; }
+.sb-av { width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:900; color:#fff; font-size:.9rem; }
+.sb-uname { font-weight:800; color:#fff; font-size:.85rem; }
+.sb-urole { font-size:.62rem; color:rgba(255,255,255,.4); }
+.sb-nav { flex:1; padding:.8rem 0; }
+.sb-sec { font-size:.58rem; font-weight:800; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,.25); padding:.5rem 1.5rem; margin-top:.5rem; }
+.sb-link {
+  display:flex; align-items:center; gap:.8rem; padding:.75rem 1.5rem;
+  color:rgba(255,255,255,.5); font-size:.83rem; font-weight:700;
+  cursor:pointer; border-left:3px solid transparent; transition:all .2s;
+}
+.sb-link:hover, .sb-link.on { background:rgba(255,255,255,.06); color:#fff; border-left-color:#F5A800; }
+.sb-badge { background:#E8001C; color:#fff; font-size:.58rem; font-weight:800; padding:2px 7px; border-radius:10px; margin-left:auto; }
+.sb-bot { padding:1rem 1.5rem; border-top:1px solid rgba(255,255,255,.07); }
+.sb-logout { color:rgba(255,255,255,.35); font-size:.78rem; cursor:pointer; }
+.sb-logout:hover { color:#E8001C; }
+
+/* TOPBAR */
+.main { display:flex; flex-direction:column; }
+.topbar {
+  background:#fff; border-bottom:1px solid #E5E7EB; padding:0 2rem;
+  height:64px; display:flex; align-items:center; justify-content:space-between;
+  position:sticky; top:0; z-index:100; box-shadow:0 2px 12px rgba(0,0,0,.07);
+}
+.tb-title { font-size:1.2rem; font-weight:900; }
+.tb-tag { padding:5px 16px; border-radius:20px; font-size:.72rem; font-weight:800; }
+.tag-ceo { background:rgba(245,168,0,.15); color:#a06800; }
+.tag-sup { background:rgba(139,92,246,.1); color:#7C3AED; }
+.tag-agent { background:rgba(232,0,28,.08); color:#E8001C; }
+
+/* PAGES */
+.page { display:none; padding:1.8rem; flex:1; overflow-y:auto; }
+.page.on { display:block; }
+
+/* STATS */
+.sg { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-bottom:1.8rem; }
+.sc {
+  background:#fff; border-radius:12px; padding:1.4rem;
+  box-shadow:0 2px 12px rgba(0,0,0,.07); border-top:3px solid #ccc;
+}
+.sc-red { border-top-color:#E8001C; }
+.sc-gold { border-top-color:#F5A800; }
+.sc-green { border-top-color:#1A8A2E; }
+.sc-blue { border-top-color:#3B82F6; }
+.sc-ico { font-size:1.8rem; margin-bottom:.6rem; }
+.sc-val { font-size:2rem; font-weight:900; line-height:1; }
+.sc-lbl { font-size:.68rem; font-weight:800; color:#666; text-transform:uppercase; letter-spacing:.5px; margin-top:.3rem; }
+
+/* CARD */
+.card { background:#fff; border-radius:12px; box-shadow:0 2px 12px rgba(0,0,0,.07); overflow:hidden; margin-bottom:1.2rem; }
+.card-h { padding:1.1rem 1.5rem; border-bottom:1px solid #E5E7EB; display:flex; align-items:center; justify-content:space-between; }
+.card-t { font-weight:800; font-size:.92rem; }
+
+/* BTN */
+.btn { padding:8px 16px; border-radius:7px; font-size:.76rem; font-weight:800; cursor:pointer; border:none; font-family:Arial,sans-serif; display:inline-flex; align-items:center; gap:.3rem; }
+.btn-red { background:#E8001C; color:#fff; }
+.btn-red:hover { background:#b8001a; }
+.btn-green { background:#1A8A2E; color:#fff; }
+.btn-gold { background:#F5A800; color:#fff; }
+.btn-outline { background:transparent; border:1.5px solid #E5E7EB; color:#666; }
+.btn-outline:hover { border-color:#E8001C; color:#E8001C; }
+.btn-sm { padding:5px 12px; font-size:.7rem; }
+
+/* TABLE */
+.tbl-wrap { overflow-x:auto; }
+table { width:100%; border-collapse:collapse; font-size:.82rem; }
+th { padding:.8rem 1rem; text-align:left; font-size:.65rem; font-weight:800; text-transform:uppercase; color:#666; background:#FAFAFA; border-bottom:1px solid #E5E7EB; white-space:nowrap; }
+td { padding:.85rem 1rem; border-bottom:1px solid #E5E7EB; vertical-align:middle; }
+tr:last-child td { border-bottom:none; }
+tr:hover td { background:#FAFBFF; }
+
+/* BADGE */
+.badge { display:inline-flex; align-items:center; gap:.25rem; padding:3px 10px; border-radius:20px; font-size:.66rem; font-weight:800; }
+.b-new { background:rgba(59,130,246,.12); color:#2563EB; }
+.b-affect { background:rgba(139,92,246,.12); color:#7C3AED; }
+.b-confirm { background:rgba(245,168,0,.12); color:#D97706; }
+.b-livraison { background:rgba(26,138,46,.12); color:#1A8A2E; }
+.b-livre { background:rgba(26,138,46,.2); color:#1A8A2E; }
+.b-reporte { background:rgba(249,115,22,.12); color:#F97316; }
+.b-annule { background:rgba(232,0,28,.12); color:#E8001C; }
+.b-injoignable { background:rgba(107,114,128,.12); color:#666; }
+
+/* FORM */
+.fg2 { margin-bottom:1.1rem; }
+.fg2 label { display:block; font-size:.72rem; font-weight:800; text-transform:uppercase; color:#666; margin-bottom:.4rem; }
+.fg2 input, .fg2 select, .fg2 textarea {
+  width:100%; padding:11px 14px; border:1.5px solid #E5E7EB;
+  border-radius:8px; font-family:Arial,sans-serif; font-size:.9rem;
+  outline:none; background:#fff; color:#1a1a1a;
+}
+.fg2 input:focus, .fg2 select:focus { border-color:#E8001C; }
+.fg2 textarea { resize:vertical; min-height:80px; }
+.frow { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+
+/* AGENTS GRID */
+.agents-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:1.2rem; padding:1.5rem; }
+.agent-card {
+  background:#fff; border:1.5px solid #E5E7EB; border-radius:14px;
+  padding:1.5rem; text-align:center; box-shadow:0 2px 12px rgba(0,0,0,.07);
+  position:relative;
+}
+.agent-av { width:50px; height:50px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:900; color:#fff; font-size:1rem; margin:0 auto .8rem; }
+.agent-name { font-weight:900; font-size:.92rem; margin-bottom:.3rem; }
+.agent-stats { display:grid; grid-template-columns:1fr 1fr 1fr; gap:.4rem; margin:.8rem 0; }
+.ags { background:#F4F6FA; border-radius:6px; padding:.4rem; text-align:center; }
+.ags-n { font-size:1.1rem; font-weight:900; }
+.ags-l { font-size:.58rem; color:#666; text-transform:uppercase; }
+.del-btn { position:absolute; top:.6rem; right:.6rem; background:rgba(232,0,28,.08); border:none; color:#E8001C; width:26px; height:26px; border-radius:50%; cursor:pointer; font-size:.7rem; }
+
+/* KANBAN */
+.kanban { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:1.2rem; }
+.k-col { background:#F4F6FA; border-radius:12px; padding:1rem; }
+.k-col-h { font-weight:800; font-size:.85rem; margin-bottom:1rem; display:flex; align-items:center; justify-content:space-between; }
+.k-cnt { font-size:.68rem; font-weight:800; padding:2px 8px; border-radius:10px; }
+.k-card {
+  background:#fff; border-radius:10px; padding:1rem; margin-bottom:.7rem;
+  border-left:3px solid; box-shadow:0 2px 12px rgba(0,0,0,.07); cursor:pointer;
+}
+.k-id { font-size:.68rem; font-weight:800; color:#666; }
+.k-client { font-weight:800; font-size:.88rem; margin:.2rem 0; }
+.k-prix { font-size:1.1rem; font-weight:900; color:#E8001C; margin-top:.3rem; }
+
+/* MODAL */
+.overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:1000; align-items:center; justify-content:center; }
+.overlay.show { display:flex; }
+.modal { background:#fff; border-radius:16px; padding:2rem; width:90%; max-width:550px; box-shadow:0 25px 80px rgba(0,0,0,.25); max-height:90vh; overflow-y:auto; }
+.modal h3 { font-size:1.3rem; font-weight:900; margin-bottom:1.5rem; }
+.modal-foot { display:flex; gap:.7rem; justify-content:flex-end; margin-top:1.5rem; padding-top:1rem; border-top:1px solid #E5E7EB; }
+
+/* STATUS OPTIONS */
+.status-opts { display:grid; grid-template-columns:repeat(3,1fr); gap:.6rem; margin:.5rem 0 1rem; }
+.so { border:2px solid #E5E7EB; border-radius:8px; padding:.7rem; cursor:pointer; text-align:center; font-size:.75rem; font-weight:800; }
+.so-confirm { border-color:#F5A800; color:#F5A800; }
+.so-confirm.picked, .so-confirm:hover { background:#F5A800; color:#fff; }
+.so-livre { border-color:#1A8A2E; color:#1A8A2E; }
+.so-livre.picked, .so-livre:hover { background:#1A8A2E; color:#fff; }
+.so-livraison { border-color:#3B82F6; color:#3B82F6; }
+.so-livraison.picked, .so-livraison:hover { background:#3B82F6; color:#fff; }
+.so-reporte { border-color:#F97316; color:#F97316; }
+.so-reporte.picked, .so-reporte:hover { background:#F97316; color:#fff; }
+.so-injoignable { border-color:#666; color:#666; }
+.so-injoignable.picked, .so-injoignable:hover { background:#666; color:#fff; }
+.so-annule { border-color:#E8001C; color:#E8001C; }
+.so-annule.picked, .so-annule:hover { background:#E8001C; color:#fff; }
+
+/* TOAST */
+.toast { position:fixed; bottom:1.5rem; right:1.5rem; padding:.9rem 1.4rem; border-radius:10px; font-size:.83rem; font-weight:700; z-index:9999; display:none; box-shadow:0 8px 30px rgba(0,0,0,.12); }
+.toast.show { display:block; }
+.t-ok { background:#111; color:#fff; }
+.t-warn { background:#F97316; color:#fff; }
+.t-err { background:#E8001C; color:#fff; }
+
+/* PERF BAR */
+.perf-bar-wrap { background:#F4F6FA; border-radius:4px; height:6px; margin:.4rem 0; }
+.perf-bar { height:6px; border-radius:4px; background:linear-gradient(90deg,#1A8A2E,#F5A800); }
+
+@media(max-width:768px) {
+  .layout { grid-template-columns:1fr; }
+  .sidebar { display:none; }
+  .sg { grid-template-columns:repeat(2,1fr); }
+  .frow { grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <div class="login-title">HPSHOP</div>
+    <div class="login-sub">Espace Administration Interne</div>
+    <div class="fg">
+      <label>Identifiant</label>
+      <input type="text" id="lu" placeholder="Votre identifiant">
+    </div>
+    <div class="fg">
+      <label>Mot de passe</label>
+      <input type="password" id="lp" placeholder="Votre mot de passe">
+    </div>
+    <button class="login-btn" id="loginBtn">ACCEDER</button>
+    <div class="hint">
+      CEO : ceo / hpshop2026<br>
+      Superviseur : super / hpshop2026<br>
+      Agent : agent01 a agent06 / hpshop2026
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="layout" id="app" style="display:none">
+  <div class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-main">HPSHOP</div>
+      <div class="sb-logo-sub">Administration</div>
+    </div>
+    <div class="sb-user">
+      <div class="sb-av" id="sbAv"></div>
+      <div>
+        <div class="sb-uname" id="sbName"></div>
+        <div class="sb-urole" id="sbRole"></div>
+      </div>
+    </div>
+    <div class="sb-nav" id="sbNav"></div>
+    <div class="sb-bot">
+      <div class="sb-logout" id="logoutBtn">Deconnexion</div>
+    </div>
+  </div>
+  <div class="main">
+    <div class="topbar">
+      <div class="tb-title" id="tbTitle">Tableau de bord</div>
+      <div class="tb-tag" id="tbTag"></div>
+    </div>
+
+    <!-- CEO DASH -->
+    <div class="page on" id="pg-ceo-dash">
+      <div class="sg" id="ceoStats"></div>
+      <div class="card">
+        <div class="card-h">
+          <span class="card-t">Nouvelles commandes a affecter</span>
+          <div style="display:flex;gap:.5rem">
+            <span id="newCount" style="font-size:.78rem;font-weight:800;color:#E8001C"></span>
+            <button class="btn btn-gold btn-sm" id="autoAffectBtn">Affecter auto</button>
+          </div>
+        </div>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>#</th><th>Client</th><th>Tel</th><th>Produit</th><th>Ville</th><th>Montant</th><th>Paiement</th><th>Statut</th><th>Agent</th><th>Actions</th></tr></thead>
+          <tbody id="newOrdersTbl"></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- CEO TOUTES COMMANDES -->
+    <div class="page" id="pg-ceo-orders">
+      <div class="card">
+        <div class="card-h">
+          <span class="card-t">Toutes les commandes</span>
+          <div style="display:flex;gap:.5rem">
+            <button class="btn btn-green btn-sm" id="exportWABtn">WhatsApp</button>
+            <button class="btn btn-outline btn-sm" id="exportCSVBtn">CSV</button>
+          </div>
+        </div>
+        <div style="padding:.8rem 1.5rem;border-bottom:1px solid #E5E7EB;display:flex;gap:.6rem;flex-wrap:wrap">
+          <input type="text" placeholder="Rechercher..." style="padding:7px 12px;border:1.5px solid #E5E7EB;border-radius:7px;font-size:.78rem;width:200px;outline:none" id="searchInput">
+          <select style="padding:7px 12px;border:1.5px solid #E5E7EB;border-radius:7px;font-size:.78rem;outline:none" id="statusFilter">
+            <option value="all">Tous statuts</option>
+            <option>Nouvelle</option><option>Affectee</option><option>Confirmee</option>
+            <option>En livraison</option><option>Livree</option><option>Reportee</option>
+            <option>Injoignable</option><option>Annulee</option>
+          </select>
+        </div>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>#</th><th>Date</th><th>Client</th><th>Tel</th><th>Produit</th><th>Ville</th><th>Montant</th><th>Agent</th><th>Statut</th><th>Actions</th></tr></thead>
+          <tbody id="allOrdersTbl"></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- CEO AGENTS -->
+    <div class="page" id="pg-ceo-agents">
+      <div class="card">
+        <div class="card-h">
+          <span class="card-t">Gestion des agents</span>
+          <button class="btn btn-red" id="addAgentBtn">+ Ajouter agent</button>
+        </div>
+        <div class="agents-grid" id="agentsGrid"></div>
+      </div>
+    </div>
+
+    <!-- SUP DASH -->
+    <div class="page" id="pg-sup-dash">
+      <div class="sg" id="supStats"></div>
+      <div class="card">
+        <div class="card-h">
+          <span class="card-t">Commandes a affecter</span>
+          <div style="display:flex;gap:.5rem">
+            <span id="supNewCount" style="font-size:.78rem;font-weight:800;color:#E8001C"></span>
+            <button class="btn btn-gold btn-sm" id="supAutoBtn">Affecter auto</button>
+          </div>
+        </div>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>#</th><th>Client</th><th>Tel</th><th>Produit</th><th>Ville</th><th>Montant</th><th>Statut</th><th>Agent</th><th>Actions</th></tr></thead>
+          <tbody id="supNewTbl"></tbody>
+        </table></div>
+      </div>
+      <div class="card">
+        <div class="card-h"><span class="card-t">Performance agents</span></div>
+        <div style="padding:1.2rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:1rem" id="perfGrid"></div>
+      </div>
+    </div>
+
+    <!-- AGENT PAGE -->
+    <div class="page" id="pg-agent">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem">
+        <div>
+          <h2 style="font-size:1.4rem;font-weight:900">Mes commandes</h2>
+          <p style="font-size:.8rem;color:#666" id="agentInfo"></p>
+        </div>
+      </div>
+      <div class="kanban" id="agentKanban"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL AFFECTER -->
+<div class="overlay" id="affectOverlay">
+  <div class="modal">
+    <h3>Affecter commande <span id="affId" style="color:#E8001C"></span></h3>
+    <div style="background:#F4F6FA;padding:1rem;border-radius:8px;margin-bottom:1.2rem" id="affDetail"></div>
+    <p style="font-size:.75rem;font-weight:800;text-transform:uppercase;color:#666;margin-bottom:.8rem">Choisir un agent :</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem" id="agentChoiceGrid"></div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" id="affCancelBtn">Annuler</button>
+      <button class="btn btn-gold" id="affConfirmBtn">Affecter</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL STATUT -->
+<div class="overlay" id="statusOverlay">
+  <div class="modal">
+    <h3>Mise a jour <span id="stId" style="color:#E8001C"></span></h3>
+    <div style="background:#F4F6FA;padding:.8rem;border-radius:8px;margin-bottom:1rem" id="stDetail"></div>
+    <p style="font-size:.72rem;font-weight:800;text-transform:uppercase;color:#666;margin-bottom:.5rem">Nouveau statut :</p>
+    <div class="status-opts">
+      <div class="so so-confirm" data-s="Confirmee">Confirme</div>
+      <div class="so so-livraison" data-s="En livraison">En livraison</div>
+      <div class="so so-livre" data-s="Livree">Livre</div>
+      <div class="so so-reporte" data-s="Reportee">Reporte</div>
+      <div class="so so-injoignable" data-s="Injoignable">Injoignable</div>
+      <div class="so so-annule" data-s="Annulee">Annule</div>
+    </div>
+    <div class="fg2"><label>Note</label><textarea id="stNote" placeholder="Ex: Client rappele a 14h..."></textarea></div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" id="stCancelBtn">Annuler</button>
+      <button class="btn btn-red" id="stConfirmBtn">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL AGENT -->
+<div class="overlay" id="agentOverlay">
+  <div class="modal">
+    <h3 id="agentModalTitle">Ajouter un agent</h3>
+    <div class="frow">
+      <div class="fg2"><label>Nom complet *</label><input type="text" id="agNom" placeholder="Ex: Mamadou Bah"></div>
+      <div class="fg2"><label>Role *</label>
+        <select id="agRole">
+          <option value="agent">Agent</option>
+          <option value="super">Superviseur</option>
+        </select>
+      </div>
+    </div>
+    <div class="frow">
+      <div class="fg2"><label>Identifiant *</label><input type="text" id="agId" placeholder="Ex: agent07"></div>
+      <div class="fg2"><label>Mot de passe *</label><input type="password" id="agPass" placeholder="Min 6 caracteres"></div>
+    </div>
+    <div class="frow">
+      <div class="fg2"><label>Telephone</label><input type="text" id="agTel" placeholder="+224 6XX XXX XXX"></div>
+      <div class="fg2"><label>Zone</label><input type="text" id="agZone" placeholder="Ex: Conakry Centre"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" id="agCancelBtn">Annuler</button>
+      <button class="btn btn-red" id="agSaveBtn">Sauvegarder</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toastEl"></div>
+
+<script>
+// DONNEES
+var USERS = [
+  {id:"ceo", pass:"hpshop2026", name:"CEO HPSHOP", role:"ceo", color:"#F5A800"},
+  {id:"super", pass:"hpshop2026", name:"Superviseur General", role:"super", color:"#8B5CF6"},
+  {id:"agent01", pass:"hpshop2026", name:"Mamadou Bah", role:"agent", color:"#E8001C"},
+  {id:"agent02", pass:"hpshop2026", name:"Fatoumata Diallo", role:"agent", color:"#1A8A2E"},
+  {id:"agent03", pass:"hpshop2026", name:"Ibrahima Sow", role:"agent", color:"#3B82F6"},
+  {id:"agent04", pass:"hpshop2026", name:"Aissatou Camara", role:"agent", color:"#8B5CF6"},
+  {id:"agent05", pass:"hpshop2026", name:"Seydou Kouyate", role:"agent", color:"#F97316"},
+  {id:"agent06", pass:"hpshop2026", name:"Kadiatou Barry", role:"agent", color:"#EC4899"}
+];
+
+var PRODUITS = ["Fer a Lisser Pro","Montre GPS","Climatiseur Portable","Drone 4K","Robot Cuiseur","Blender Pro","Kit Soin Visage","Velo Appartement"];
+var EMOJIS = ["💇‍♀️","⌚","❄️","🚁","🍳","🥤","✨","🚴"];
+var PRIX = [185000,210000,250000,240000,220000,185000,200000,245000];
+var NOMS = ["Fatoumata K.","Mamadou B.","Aissatou M.","Seydou D.","Kadiatou S.","Ibrahim C.","Mariama T.","Oumar L."];
+var VILLES = ["Conakry","Conakry","Conakry","Kindia","Labe","Kankan","Mamou"];
+var PAYS = ["Cash livraison","Orange Money","Soutrat Money","MTN MoMo","Wave"];
+var STATUTS_D = ["Nouvelle","Nouvelle","Affectee","Confirmee","En livraison","Livree","Reportee","Injoignable","Annulee"];
+var ST_MAP = {
+  "Nouvelle": {cls:"b-new", label:"Nouvelle"},
+  "Affectee": {cls:"b-affect", label:"Affectee"},
+  "Confirmee": {cls:"b-confirm", label:"Confirmee"},
+  "En livraison": {cls:"b-livraison", label:"En livraison"},
+  "Livree": {cls:"b-livre", label:"Livree"},
+  "Reportee": {cls:"b-reporte", label:"Reportee"},
+  "Injoignable": {cls:"b-injoignable", label:"Injoignable"},
+  "Annulee": {cls:"b-annule", label:"Annulee"}
+};
+
+// Generer commandes
+var orders = [];
+for (var i = 1; i <= 40; i++) {
+  var pi = Math.floor(Math.random() * PRODUITS.length);
+  var st = STATUTS_D[Math.floor(Math.random() * STATUTS_D.length)];
+  var agents = USERS.filter(function(u) { return u.role === "agent"; });
+  var ag = st !== "Nouvelle" ? agents[Math.floor(Math.random() * agents.length)] : null;
+  var h = String(Math.floor(Math.random()*10)+8).padStart(2,"0");
+  var m = String(Math.floor(Math.random()*60)).padStart(2,"0");
+  orders.push({
+    id: "HP" + String(i).padStart(4,"0"),
+    date: "26/04/2026 " + h + ":" + m,
+    client: NOMS[Math.floor(Math.random()*NOMS.length)],
+    tel: "6" + (Math.floor(Math.random()*3)+2) + "" + (Math.floor(Math.random()*9000000)+1000000),
+    produit: PRODUITS[pi],
+    emoji: EMOJIS[pi],
+    prix: PRIX[pi],
+    ville: VILLES[Math.floor(Math.random()*VILLES.length)],
+    adresse: "Quartier Centre",
+    paiement: PAYS[Math.floor(Math.random()*PAYS.length)],
+    statut: st,
+    agent: ag ? ag.id : null,
+    agentName: ag ? ag.name : null,
+    note: ""
+  });
+}
+
+var currentUser = null;
+var targetOId = null;
+var pickedAg = null;
+var pickedSt = null;
+var editAgId = null;
+
+// LOGIN
+document.getElementById("loginBtn").onclick = function() { doLogin(); };
+document.getElementById("lp").onkeydown = function(e) { if (e.key === "Enter") doLogin(); };
+document.getElementById("lu").onkeydown = function(e) { if (e.key === "Enter") doLogin(); };
+
+function doLogin() {
+  var u = document.getElementById("lu").value.trim();
+  var p = document.getElementById("lp").value.trim();
+  var user = null;
+  for (var i = 0; i < USERS.length; i++) {
+    if (USERS[i].id === u && USERS[i].pass === p) {
+      user = USERS[i];
+      break;
+    }
+  }
+  if (!user) {
+    toast("Identifiant ou mot de passe incorrect", "err");
+    return;
+  }
+  currentUser = user;
+  document.getElementById("loginScreen").style.display = "none";
+  document.getElementById("app").style.display = "grid";
+  initApp();
+}
+
+document.getElementById("logoutBtn").onclick = function() {
+  currentUser = null;
+  document.getElementById("loginScreen").style.display = "flex";
+  document.getElementById("app").style.display = "none";
+  document.getElementById("lu").value = "";
+  document.getElementById("lp").value = "";
+};
+
+function initApp() {
+  var u = currentUser;
+  var init = u.name.split(" ").map(function(n) { return n[0]; }).join("").slice(0,2).toUpperCase();
+  var sbAv = document.getElementById("sbAv");
+  sbAv.textContent = init;
+  sbAv.style.background = "linear-gradient(135deg," + u.color + "," + u.color + "88)";
+  document.getElementById("sbName").textContent = u.name;
+  document.getElementById("sbRole").textContent = u.role === "ceo" ? "CEO - Acces Total" : u.role === "super" ? "Superviseur" : "Agent";
+  var tbTag = document.getElementById("tbTag");
+  tbTag.textContent = u.role === "ceo" ? "CEO" : u.role === "super" ? "Superviseur" : "Agent";
+  tbTag.className = "tb-tag " + (u.role === "ceo" ? "tag-ceo" : u.role === "super" ? "tag-sup" : "tag-agent");
+  if (u.role === "ceo") setupCEO();
+  else if (u.role === "super") setupSup();
+  else setupAgent();
+}
+
+// HELPERS
+function getAgents() { return USERS.filter(function(u) { return u.role === "agent"; }); }
+function stBadge(s) {
+  var st = ST_MAP[s] || {cls:"b-new", label:s};
+  return '<span class="badge ' + st.cls + '">' + st.label + '</span>';
+}
+function prixFormat(p) { return p.toLocaleString("fr") + " GNF"; }
+
+// CEO SETUP
+function setupCEO() {
+  document.getElementById("sbNav").innerHTML =
+    '<div class="sb-sec">Vue globale</div>' +
+    '<div class="sb-link on" data-pg="ceo-dash">Tableau de bord <span class="sb-badge" id="newBadge">' + orders.filter(function(o){return o.statut==="Nouvelle";}).length + '</span></div>' +
+    '<div class="sb-link" data-pg="ceo-orders">Toutes commandes</div>' +
+    '<div class="sb-sec">Equipe</div>' +
+    '<div class="sb-link" data-pg="ceo-agents">Agents</div>';
+  bindNav();
+  renderCEODash();
+  renderAllOrders(orders);
+  renderAgentsGrid();
+}
+
+function renderCEODash() {
+  var total = orders.length;
+  var nouvelles = orders.filter(function(o){return o.statut==="Nouvelle";}).length;
+  var livrees = orders.filter(function(o){return o.statut==="Livree";}).length;
+  var ca = orders.filter(function(o){return o.statut==="Livree";}).reduce(function(s,o){return s+o.prix;}, 0);
+  document.getElementById("ceoStats").innerHTML =
+    '<div class="sc sc-blue"><div class="sc-ico">📦</div><div class="sc-val">' + total + '</div><div class="sc-lbl">Total</div></div>' +
+    '<div class="sc sc-red"><div class="sc-ico">🆕</div><div class="sc-val">' + nouvelles + '</div><div class="sc-lbl">A affecter</div></div>' +
+    '<div class="sc sc-green"><div class="sc-ico">📬</div><div class="sc-val">' + livrees + '</div><div class="sc-lbl">Livrees</div></div>' +
+    '<div class="sc sc-gold"><div class="sc-ico">💰</div><div class="sc-val">' + (ca/1000000).toFixed(1) + 'M</div><div class="sc-lbl">CA GNF</div></div>';
+  document.getElementById("newCount").textContent = nouvelles + " commande(s) a affecter";
+  var news = orders.filter(function(o){return o.statut==="Nouvelle";});
+  var rows = "";
+  for (var i = 0; i < news.length; i++) {
+    var o = news[i];
+    rows += '<tr>' +
+      '<td><b style="color:#E8001C">' + o.id + '</b></td>' +
+      '<td><b>' + o.client + '</b></td>' +
+      '<td>' + o.tel + '</td>' +
+      '<td>' + o.emoji + ' ' + o.produit + '</td>' +
+      '<td>' + o.ville + '</td>' +
+      '<td style="font-weight:800">' + prixFormat(o.prix) + '</td>' +
+      '<td style="font-size:.75rem">' + o.paiement + '</td>' +
+      '<td>' + stBadge(o.statut) + '</td>' +
+      '<td><i style="color:#999">Non affecte</i></td>' +
+      '<td><div style="display:flex;gap:.3rem">' +
+        '<button class="btn btn-gold btn-sm" onclick="openAffect('' + o.id + '')">Affecter</button>' +
+        '<button class="btn btn-green btn-sm" onclick="sendWA('' + o.id + '')">WA</button>' +
+      '</div></td>' +
+    '</tr>';
+  }
+  document.getElementById("newOrdersTbl").innerHTML = rows || '<tr><td colspan="10" style="text-align:center;padding:2rem;color:#999">Toutes les commandes sont affectees</td></tr>';
+  var badge = document.getElementById("newBadge");
+  if (badge) badge.textContent = nouvelles;
+}
+
+function renderAllOrders(list) {
+  var rows = "";
+  for (var i = 0; i < list.length; i++) {
+    var o = list[i];
+    rows += '<tr>' +
+      '<td><b style="color:#E8001C">' + o.id + '</b></td>' +
+      '<td style="font-size:.72rem">' + o.date + '</td>' +
+      '<td><b>' + o.client + '</b></td>' +
+      '<td style="font-size:.75rem">' + o.tel + '</td>' +
+      '<td>' + o.emoji + ' ' + o.produit + '</td>' +
+      '<td>' + o.ville + '</td>' +
+      '<td style="font-weight:800">' + prixFormat(o.prix) + '</td>' +
+      '<td style="font-size:.75rem">' + (o.agentName || '<i style="color:#999">-</i>') + '</td>' +
+      '<td>' + stBadge(o.statut) + '</td>' +
+      '<td><div style="display:flex;gap:.25rem">' +
+        (o.statut === "Nouvelle" ? '<button class="btn btn-gold btn-sm" onclick="openAffect('' + o.id + '')">Affecter</button>' : '') +
+        '<button class="btn btn-outline btn-sm" onclick="openStatus('' + o.id + '')">Statut</button>' +
+        '<button class="btn btn-green btn-sm" onclick="sendWA('' + o.id + '')">WA</button>' +
+      '</div></td>' +
+    '</tr>';
+  }
+  var tbl = document.getElementById("allOrdersTbl");
+  if (tbl) tbl.innerHTML = rows;
+}
+
+// AGENTS
+function renderAgentsGrid() {
+  var agents = getAgents();
+  var html = "";
+  for (var i = 0; i < agents.length; i++) {
+    var a = agents[i];
+    var mes = orders.filter(function(o){return o.agent === a.id;});
+    var liv = mes.filter(function(o){return o.statut==="Livree";}).length;
+    var enc = mes.filter(function(o){return ["Affectee","Confirmee","En livraison"].includes(o.statut);}).length;
+    var tx = mes.length ? Math.round(liv/mes.length*100) : 0;
+    var init = a.name.split(" ").map(function(n){return n[0];}).join("").slice(0,2);
+    html += '<div class="agent-card">' +
+      '<button class="del-btn" onclick="deleteAgent('' + a.id + '')">x</button>' +
+      '<div class="agent-av" style="background:linear-gradient(135deg,' + a.color + ',' + a.color + '88)">' + init + '</div>' +
+      '<div class="agent-name">' + a.name + '</div>' +
+      '<div style="font-size:.7rem;color:#666;margin-bottom:.5rem">' + a.id + '</div>' +
+      '<div class="agent-stats">' +
+        '<div class="ags"><div class="ags-n">' + mes.length + '</div><div class="ags-l">Total</div></div>' +
+        '<div class="ags"><div class="ags-n" style="color:#F5A800">' + enc + '</div><div class="ags-l">En cours</div></div>' +
+        '<div class="ags"><div class="ags-n" style="color:#1A8A2E">' + liv + '</div><div class="ags-l">Livrees</div></div>' +
+      '</div>' +
+      '<div class="perf-bar-wrap"><div class="perf-bar" style="width:' + tx + '%"></div></div>' +
+      '<div style="display:flex;justify-content:space-between;font-size:.68rem;color:#666;margin:.2rem 0 .8rem">' +
+        '<span>Performance</span><span style="color:#1A8A2E;font-weight:800">' + tx + '%</span>' +
+      '</div>' +
+      '<div style="display:flex;gap:.4rem;justify-content:center">' +
+        '<button class="btn btn-outline btn-sm" onclick="editAgent('' + a.id + '')">Modifier</button>' +
+        '<button class="btn btn-green btn-sm" onclick="sendWA('' + orders.find(function(o){return o.agent===a.id;})||\'\'.id||\'\'">WA</button>' +
+      '</div>' +
+    '</div>';
+  }
+  html += '<div style="border:2px dashed #E5E7EB;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:180px;cursor:pointer" onclick="openAddAgent()">' +
+    '<div style="font-size:2rem">+</div><div style="font-weight:800;color:#666;font-size:.85rem">Ajouter un agent</div>' +
+  '</div>';
+  var grid = document.getElementById("agentsGrid");
+  if (grid) grid.innerHTML = html;
+}
+
+// AGENT BUTTONS
+document.getElementById("addAgentBtn").onclick = function() { openAddAgent(); };
+document.getElementById("agCancelBtn").onclick = function() { closeOverlays(); };
+document.getElementById("agSaveBtn").onclick = function() { saveAgent(); };
+
+function openAddAgent() {
+  editAgId = null;
+  document.getElementById("agentModalTitle").textContent = "Ajouter un agent";
+  document.getElementById("agNom").value = "";
+  document.getElementById("agId").value = "";
+  document.getElementById("agPass").value = "";
+  document.getElementById("agTel").value = "";
+  document.getElementById("agZone").value = "";
+  document.getElementById("agRole").value = "agent";
+  document.getElementById("agentOverlay").classList.add("show");
+}
+
+function editAgent(id) {
+  var a = USERS.find(function(u){return u.id===id;});
+  if (!a) return;
+  editAgId = id;
+  document.getElementById("agentModalTitle").textContent = "Modifier agent";
+  document.getElementById("agNom").value = a.name;
+  document.getElementById("agId").value = a.id;
+  document.getElementById("agPass").value = a.pass;
+  document.getElementById("agRole").value = a.role;
+  document.getElementById("agTel").value = a.tel || "";
+  document.getElementById("agZone").value = a.zone || "";
+  document.getElementById("agentOverlay").classList.add("show");
+}
+
+function saveAgent() {
+  var nom = document.getElementById("agNom").value.trim();
+  var id = document.getElementById("agId").value.trim();
+  var pass = document.getElementById("agPass").value.trim();
+  var role = document.getElementById("agRole").value;
+  var tel = document.getElementById("agTel").value.trim();
+  var zone = document.getElementById("agZone").value.trim();
+  if (!nom || !id || !pass) { toast("Remplissez tous les champs obligatoires", "warn"); return; }
+  if (editAgId) {
+    var idx = USERS.findIndex(function(u){return u.id===editAgId;});
+    if (idx >= 0) { USERS[idx].name = nom; USERS[idx].id = id; USERS[idx].pass = pass; USERS[idx].role = role; USERS[idx].tel = tel; USERS[idx].zone = zone; }
+    toast("Agent " + nom + " modifie !", "ok");
+  } else {
+    if (USERS.find(function(u){return u.id===id;})) { toast("Identifiant deja utilise", "err"); return; }
+    USERS.push({id:id, pass:pass, name:nom, role:role, color:"#E8001C", tel:tel, zone:zone});
+    toast("Agent " + nom + " ajoute !", "ok");
+  }
+  closeOverlays();
+  renderAgentsGrid();
+}
+
+function deleteAgent(id) {
+  if (!confirm("Supprimer cet agent ?")) return;
+  USERS = USERS.filter(function(u){return u.id!==id;});
+  renderAgentsGrid();
+  toast("Agent supprime", "warn");
+}
+
+// SUPERVISEUR
+function setupSup() {
+  document.getElementById("sbNav").innerHTML =
+    '<div class="sb-sec">Supervision</div>' +
+    '<div class="sb-link on" data-pg="sup-dash">Tableau de bord <span class="sb-badge" id="supBadge">' + orders.filter(function(o){return o.statut==="Nouvelle";}).length + '</span></div>';
+  bindNav();
+  renderSupDash();
+}
+
+function renderSupDash() {
+  var total = orders.length;
+  var nouvelles = orders.filter(function(o){return o.statut==="Nouvelle";}).length;
+  var livrees = orders.filter(function(o){return o.statut==="Livree";}).length;
+  var ca = orders.filter(function(o){return o.statut==="Livree";}).reduce(function(s,o){return s+o.prix;}, 0);
+  document.getElementById("supStats").innerHTML =
+    '<div class="sc sc-red"><div class="sc-ico">🆕</div><div class="sc-val">' + nouvelles + '</div><div class="sc-lbl">A affecter</div></div>' +
+    '<div class="sc sc-blue"><div class="sc-ico">📦</div><div class="sc-val">' + total + '</div><div class="sc-lbl">Total</div></div>' +
+    '<div class="sc sc-green"><div class="sc-ico">📬</div><div class="sc-val">' + livrees + '</div><div class="sc-lbl">Livrees</div></div>' +
+    '<div class="sc sc-gold"><div class="sc-ico">💰</div><div class="sc-val">' + (ca/1000000).toFixed(1) + 'M</div><div class="sc-lbl">CA GNF</div></div>';
+  document.getElementById("supNewCount").textContent = nouvelles + " a affecter";
+  var news = orders.filter(function(o){return o.statut==="Nouvelle";});
+  var rows = "";
+  for (var i = 0; i < news.length; i++) {
+    var o = news[i];
+    rows += '<tr>' +
+      '<td><b style="color:#E8001C">' + o.id + '</b></td>' +
+      '<td><b>' + o.client + '</b></td>' +
+      '<td>' + o.tel + '</td>' +
+      '<td>' + o.emoji + ' ' + o.produit + '</td>' +
+      '<td>' + o.ville + '</td>' +
+      '<td style="font-weight:800">' + prixFormat(o.prix) + '</td>' +
+      '<td>' + stBadge(o.statut) + '</td>' +
+      '<td><i style="color:#999">Non affecte</i></td>' +
+      '<td><button class="btn btn-gold btn-sm" onclick="openAffect('' + o.id + '')">Affecter</button></td>' +
+    '</tr>';
+  }
+  document.getElementById("supNewTbl").innerHTML = rows || '<tr><td colspan="9" style="text-align:center;padding:2rem;color:#999">Toutes affectees !</td></tr>';
+  // Perf
+  var agents = getAgents();
+  var perfHtml = "";
+  for (var j = 0; j < agents.length; j++) {
+    var a = agents[j];
+    var mes = orders.filter(function(o){return o.agent===a.id;});
+    var liv2 = mes.filter(function(o){return o.statut==="Livree";}).length;
+    var tx2 = mes.length ? Math.round(liv2/mes.length*100) : 0;
+    var init2 = a.name.split(" ").map(function(n){return n[0];}).join("").slice(0,2);
+    perfHtml += '<div style="background:#F4F6FA;border-radius:10px;padding:1rem;border:1.5px solid #E5E7EB">' +
+      '<div style="display:flex;align-items:center;gap:.7rem;margin-bottom:.7rem">' +
+        '<div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,' + a.color + ',' + a.color + '88);display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:.78rem">' + init2 + '</div>' +
+        '<div><div style="font-weight:800;font-size:.82rem">' + a.name + '</div><div style="font-size:.65rem;color:#666">' + mes.length + ' commandes</div></div>' +
+      '</div>' +
+      '<div class="perf-bar-wrap"><div class="perf-bar" style="width:' + tx2 + '%"></div></div>' +
+      '<div style="display:flex;justify-content:space-between;font-size:.68rem"><span style="color:#666">' + mes.length + ' total</span><span style="color:#1A8A2E;font-weight:800">' + tx2 + '%</span></div>' +
+    '</div>';
+  }
+  var perfGrid = document.getElementById("perfGrid");
+  if (perfGrid) perfGrid.innerHTML = perfHtml;
+}
+
+document.getElementById("supAutoBtn").onclick = function() { autoAffect(); renderSupDash(); };
+
+// AGENT
+function setupAgent() {
+  document.getElementById("sbNav").innerHTML =
+    '<div class="sb-sec">Mes commandes</div>' +
+    '<div class="sb-link on" data-pg="agent">Mes commandes</div>';
+  bindNav();
+  renderAgentKanban();
+}
+
+function renderAgentKanban() {
+  var my = orders.filter(function(o){return o.agent===currentUser.id;});
+  var info = document.getElementById("agentInfo");
+  if (info) info.textContent = my.length + " commandes au total - " + my.filter(function(o){return o.statut==="Affectee";}).length + " nouvelles";
+  var cols = [
+    {key:"Affectee", label:"A traiter", color:"#3B82F6"},
+    {key:"Confirmee", label:"Confirmees", color:"#F5A800"},
+    {key:"En livraison", label:"En livraison", color:"#1A8A2E"},
+    {key:"Reportee", label:"Reportees", color:"#F97316"},
+    {key:"Injoignable", label:"Injoignable", color:"#666"}
+  ];
+  var html = "";
+  for (var i = 0; i < cols.length; i++) {
+    var col = cols[i];
+    var colOrders = my.filter(function(o){return o.statut===col.key;});
+    html += '<div class="k-col">' +
+      '<div class="k-col-h">' + col.label + ' <span class="k-cnt" style="background:' + col.color + '18;color:' + col.color + '">' + colOrders.length + '</span></div>';
+    if (colOrders.length === 0) {
+      html += '<div style="text-align:center;padding:2rem;color:#999;font-size:.78rem">Aucune</div>';
+    } else {
+      for (var j = 0; j < colOrders.length; j++) {
+        var o = colOrders[j];
+        html += '<div class="k-card" style="border-left-color:' + col.color + '" onclick="openStatus('' + o.id + '')">' +
+          '<div class="k-id">' + o.id + ' - ' + o.date.split(" ")[1] + '</div>' +
+          '<div class="k-client">' + o.client + '</div>' +
+          '<div style="font-size:.72rem;color:#666">' + o.tel + '</div>' +
+          '<div style="font-size:.78rem;color:#666">' + o.emoji + ' ' + o.produit + '</div>' +
+          '<div style="font-size:.72rem;color:#666">' + o.ville + ' - ' + o.paiement + '</div>' +
+          '<div class="k-prix">' + prixFormat(o.prix) + '</div>' +
+          (o.note ? '<div style="font-size:.7rem;color:#F97316;margin-top:.3rem">' + o.note + '</div>' : '') +
+          '<div style="display:flex;gap:.4rem;margin-top:.6rem">' +
+            '<button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openStatus('' + o.id + '')">Statut</button>' +
+            '<button class="btn btn-green btn-sm" onclick="event.stopPropagation();sendWA('' + o.id + '')">WA</button>' +
+          '</div>' +
+        '</div>';
+      }
+    }
+    html += '</div>';
+  }
+  var kanban = document.getElementById("agentKanban");
+  if (kanban) kanban.innerHTML = html;
+}
+
+// AFFECTATION
+document.getElementById("affCancelBtn").onclick = function() { closeOverlays(); };
+document.getElementById("affConfirmBtn").onclick = function() { confirmAffect(); };
+
+function openAffect(id) {
+  var o = orders.find(function(x){return x.id===id;});
+  if (!o) return;
+  targetOId = id;
+  pickedAg = null;
+  document.getElementById("affId").textContent = id;
+  document.getElementById("affDetail").innerHTML =
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem">' +
+    '<div><div style="font-size:.65rem;font-weight:800;color:#666">Client</div><div style="font-weight:800">' + o.client + '</div></div>' +
+    '<div><div style="font-size:.65rem;font-weight:800;color:#666">Tel</div><div style="font-weight:800">' + o.tel + '</div></div>' +
+    '<div><div style="font-size:.65rem;font-weight:800;color:#666">Produit</div><div style="font-weight:800">' + o.emoji + ' ' + o.produit + '</div></div>' +
+    '<div><div style="font-size:.65rem;font-weight:800;color:#666">Montant</div><div style="font-weight:800;color:#E8001C">' + prixFormat(o.prix) + '</div></div>' +
+    '<div><div style="font-size:.65rem;font-weight:800;color:#666">Ville</div><div style="font-weight:800">' + o.ville + '</div></div>' +
+    '<div><div style="font-size:.65rem;font-weight:800;color:#666">Paiement</div><div style="font-weight:800">' + o.paiement + '</div></div>' +
+    '</div>';
+  var agents = getAgents();
+  var grid = "";
+  for (var i = 0; i < agents.length; i++) {
+    var a = agents[i];
+    var enc = orders.filter(function(x){return x.agent===a.id&&["Affectee","Confirmee"].includes(x.statut);}).length;
+    var init = a.name.split(" ").map(function(n){return n[0];}).join("").slice(0,2);
+    grid += '<div id="ach-' + a.id + '" style="border:2px solid #E5E7EB;border-radius:10px;padding:.9rem;cursor:pointer;display:flex;align-items:center;gap:.7rem" onclick="pickAgent('' + a.id + '')">' +
+      '<div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,' + a.color + ',' + a.color + '88);display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:.78rem;flex-shrink:0">' + init + '</div>' +
+      '<div><div style="font-weight:800;font-size:.82rem">' + a.name + '</div>' +
+      '<div style="font-size:.68rem;color:' + (enc>5?"#E8001C":enc>3?"#F97316":"#1A8A2E") + ';font-weight:800">' + enc + ' commandes en cours</div></div>' +
+    '</div>';
+  }
+  document.getElementById("agentChoiceGrid").innerHTML = grid;
+  document.getElementById("affectOverlay").classList.add("show");
+}
+
+function pickAgent(id) {
+  pickedAg = id;
+  var els = document.querySelectorAll("[id^='ach-']");
+  for (var i = 0; i < els.length; i++) {
+    els[i].style.borderColor = "#E5E7EB";
+    els[i].style.background = "#fff";
+  }
+  var el = document.getElementById("ach-" + id);
+  if (el) { el.style.borderColor = "#F5A800"; el.style.background = "rgba(245,168,0,.06)"; }
+}
+
+function confirmAffect() {
+  if (!pickedAg) { toast("Choisissez un agent", "warn"); return; }
+  var o = orders.find(function(x){return x.id===targetOId;});
+  var a = USERS.find(function(u){return u.id===pickedAg;});
+  if (o && a) { o.statut = "Affectee"; o.agent = pickedAg; o.agentName = a.name; }
+  closeOverlays();
+  if (currentUser.role === "ceo") { renderCEODash(); renderAllOrders(orders); }
+  else { renderSupDash(); }
+  toast("Commande " + targetOId + " affectee a " + a.name, "ok");
+}
+
+// AUTO AFFECTATION
+document.getElementById("autoAffectBtn").onclick = function() { autoAffect(); renderCEODash(); renderAllOrders(orders); };
+function autoAffect() {
+  var news = orders.filter(function(o){return o.statut==="Nouvelle";});
+  if (!news.length) { toast("Aucune commande a affecter", "ok"); return; }
+  var agents = getAgents();
+  for (var i = 0; i < news.length; i++) {
+    var a = agents[i % agents.length];
+    news[i].statut = "Affectee";
+    news[i].agent = a.id;
+    news[i].agentName = a.name;
+  }
+  toast(news.length + " commandes affectees !", "ok");
+}
+
+// STATUT
+document.getElementById("stCancelBtn").onclick = function() { closeOverlays(); };
+document.getElementById("stConfirmBtn").onclick = function() { confirmStatus(); };
+
+var soEls = document.querySelectorAll(".so");
+for (var i = 0; i < soEls.length; i++) {
+  soEls[i].onclick = function() {
+    var all = document.querySelectorAll(".so");
+    for (var j = 0; j < all.length; j++) all[j].classList.remove("picked");
+    this.classList.add("picked");
+    pickedSt = this.getAttribute("data-s");
+  };
+}
+
+function openStatus(id) {
+  var o = orders.find(function(x){return x.id===id;});
+  if (!o) return;
+  targetOId = id;
+  pickedSt = null;
+  document.getElementById("stId").textContent = id;
+  document.getElementById("stDetail").innerHTML =
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem">' +
+    '<div><div style="font-size:.65rem;font-weight:800;color:#666">Client</div><div style="font-weight:800">' + o.client + '</div></div>' +
+    '<div><div style="font-size:.65rem;font-weight:800;color:#666">Produit</div><div style="font-weight:800">' + o.emoji + ' ' + o.produit + '</div></div>' +
+    '</div>';
+  document.getElementById("stNote").value = o.note || "";
+  var all = document.querySelectorAll(".so");
+  for (var j = 0; j < all.length; j++) all[j].classList.remove("picked");
+  document.getElementById("statusOverlay").classList.add("show");
+}
+
+function confirmStatus() {
+  if (!pickedSt) { toast("Choisissez un statut", "warn"); return; }
+  var o = orders.find(function(x){return x.id===targetOId;});
+  if (o) { o.statut = pickedSt; o.note = document.getElementById("stNote").value; }
+  closeOverlays();
+  if (currentUser.role === "ceo") { renderCEODash(); renderAllOrders(orders); }
+  else if (currentUser.role === "super") renderSupDash();
+  else renderAgentKanban();
+  toast("Commande " + targetOId + " -> " + pickedSt, "ok");
+}
+
+// WHATSAPP
+var WA_NUM = "224XXXXXXXX";
+function sendWA(id) {
+  var o = orders.find(function(x){return x.id===id;});
+  if (!o) return;
+  var msg = "Commande HPSHOP " + o.id + "\n\nClient: " + o.client + "\nTel: " + o.tel + "\nProduit: " + o.produit + "\nMontant: " + prixFormat(o.prix) + "\nVille: " + o.ville + "\nPaiement: " + o.paiement + "\nStatut: " + o.statut;
+  window.open("https://wa.me/" + WA_NUM + "?text=" + encodeURIComponent(msg), "_blank");
+  toast("WhatsApp ouvert !", "ok");
+}
+
+document.getElementById("exportWABtn").onclick = function() {
+  var liv = orders.filter(function(o){return o.statut==="Livree";}).length;
+  var ca = orders.filter(function(o){return o.statut==="Livree";}).reduce(function(s,o){return s+o.prix;}, 0);
+  var msg = "Rapport HPSHOP\n\nTotal: " + orders.length + "\nLivrees: " + liv + "\nCA: " + (ca/1000000).toFixed(1) + "M GNF";
+  window.open("https://wa.me/" + WA_NUM + "?text=" + encodeURIComponent(msg), "_blank");
+};
+
+document.getElementById("exportCSVBtn").onclick = function() {
+  var h = "ID,Date,Client,Tel,Produit,Ville,Prix,Paiement,Agent,Statut\n";
+  var r = orders.map(function(o){return o.id+","+o.date+","+o.client+","+o.tel+","+o.produit+","+o.ville+","+o.prix+","+o.paiement+","+(o.agentName||"")+","+o.statut;}).join("\n");
+  var b = new Blob([h+r], {type:"text/csv"});
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(b);
+  a.download = "hpshop-commandes.csv";
+  a.click();
+  toast("CSV telecharge !", "ok");
+};
+
+// FILTERS
+document.getElementById("searchInput").oninput = function() {
+  var q = this.value.toLowerCase();
+  renderAllOrders(q ? orders.filter(function(o){return o.client.toLowerCase().includes(q)||o.id.includes(q);}) : orders);
+};
+document.getElementById("statusFilter").onchange = function() {
+  var s = this.value;
+  renderAllOrders(s === "all" ? orders : orders.filter(function(o){return o.statut===s;}));
+};
+
+// NAVIGATION
+function bindNav() {
+  var links = document.querySelectorAll(".sb-link");
+  for (var i = 0; i < links.length; i++) {
+    links[i].onclick = function() {
+      var pg = this.getAttribute("data-pg");
+      if (!pg) return;
+      document.querySelectorAll(".sb-link").forEach(function(l){l.classList.remove("on");});
+      this.classList.add("on");
+      document.querySelectorAll(".page").forEach(function(p){p.classList.remove("on");});
+      var pgEl = document.getElementById("pg-" + pg);
+      if (pgEl) pgEl.classList.add("on");
+      document.getElementById("tbTitle").textContent = {
+        "ceo-dash":"Tableau de bord",
+        "ceo-orders":"Toutes les commandes",
+        "ceo-agents":"Gestion des agents",
+        "sup-dash":"Tableau de bord",
+        "agent":"Mes commandes"
+      }[pg] || pg;
+    };
+  }
+}
+
+// MODALS CLOSE
+function closeOverlays() {
+  document.querySelectorAll(".overlay").forEach(function(o){o.classList.remove("show");});
+  pickedAg = null; pickedSt = null; targetOId = null; editAgId = null;
+}
+document.querySelectorAll(".overlay").forEach(function(o){
+  o.onclick = function(e){ if(e.target===this) closeOverlays(); };
+});
+
+// TOAST
+var toastTimer;
+function toast(msg, type) {
+  type = type || "ok";
+  var el = document.getElementById("toastEl");
+  el.textContent = msg;
+  el.className = "toast t-" + type + " show";
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ el.classList.remove("show"); }, 3500);
+}
+</script>
+</body>
+</html>
